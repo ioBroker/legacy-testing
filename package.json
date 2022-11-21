@@ -1,0 +1,30 @@
+{
+  "version": "0.0.1",
+  "name": "@iobroker/legacy-testing",
+  "main": "setup.js",
+  "files": [
+    "setup.js",
+    "tests/"
+  ],
+  "description": "Module to test ioBroker adapters with legacy tests. For new tests please use @iobroker/testing",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ioBroker/legacy-testing.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ioBroker/legacy-testing/issues"
+  },
+  "homepage": "https://github.com/ioBroker/legacy-testing#readme",
+  "author": {
+    "name": "bluefox",
+    "email": "dogafox@gmail.com"
+  },
+  "dependencies": {
+    "mocha": "^10.1.0",
+    "chai": "^4.3.7"
+  }
+}
