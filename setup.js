@@ -6,7 +6,7 @@
 const fs            = require('fs');
 const path          = require('path');
 const child_process = require('child_process');
-const rootDir       = path.normalize(`${__dirname}/../../`);
+const rootDir       = path.normalize(`${__dirname}/../../../`);
 const pkg           = require(`${rootDir}package.json`);
 const debug         = typeof v8debug === 'object';
 pkg.main = pkg.main || 'main.js';
@@ -18,8 +18,9 @@ adapterName = adapterName[adapterName.length - 2];
 let adapterStarted = false;
 
 function getAppName() {
-    const parts = __dirname.replace(/\\/g, '/').split('/');
-    return parts[parts.length - 3].split('.')[0];
+    const parts = rootDir.replace(/\\/g, '/').split('/');
+    parts.pop();
+    return parts.pop().split('.')[0];
 }
 
 function loadJSONLDB() {
@@ -98,9 +99,8 @@ function copyFolderRecursiveSync(source, target, ignore) {
     }
 }
 
-if (!fs.existsSync(rootDir + 'tmp')) {
-    fs.mkdirSync(rootDir + 'tmp');
-}
+!fs.existsSync(`${rootDir}tmp`) && fs.mkdirSync(`${rootDir}tmp`);
+
 
 async function storeOriginalFiles() {
     console.log('Store original files...');

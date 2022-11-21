@@ -6,12 +6,12 @@ Legacy test modules for ioBroker
 ## How to replace existing tests
 1. add to package.json=>devDependencies: `"@iobroker/legacy-testing": "^0.0.1"`
 2. Remove from package.json=>devDependencies: `chai` and `mocha`
-3. Replace in `tests/testAdapter.js` the code `const setup  = require('./lib/setup');` with `const setup = require('@iobroker/legacy-testing').setup;`
-4. Replace whole file `tests/testPackageFiles.js` with `const setup = require('@iobroker/legacy-testing').testPackageFiles;`
+3. Replace in `tests/testAdapter.js` the code `const setup  = require('./lib/setup');` with `const setup = require('@iobroker/legacy-testing');`
+4. Replace whole file `tests/testPackageFiles.js` with `require('@iobroker/legacy-testing/tests/testPackageFiles');`
 
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
-### 0.0.2 (2022-11-21)
+### **WORK IN PROGRESS**
 * (bluefox) initial release
 
 ## License
