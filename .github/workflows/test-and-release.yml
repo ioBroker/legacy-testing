@@ -61,7 +61,6 @@ jobs:
         run: npm install
 
       - name: Publish package to npm
-        working-directory: dist
         run: |
           npm config set //registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}
           npm whoami
