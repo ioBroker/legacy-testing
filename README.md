@@ -11,7 +11,7 @@ Legacy test modules for ioBroker
 
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
-### **WORK IN PROGRESS**
+### 0.1.0 (2022-12-22)
 * (bluefox) Corrected testPackageFiles.js
 
 ### 0.0.4 (2022-11-21)
