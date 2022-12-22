@@ -7,14 +7,17 @@
 const expect = require('chai').expect;
 const fs     = require('fs');
 
+// node_modules/@iobroker/legacy-testing/tests/testPackageFiles.js
+const adapterDir = `${__dirname}/../../../../`;
+
 describe('Test package.json and io-package.json', () => {
     it('Test package files', done => {
         console.log();
 
-        const fileContentIOPackage = fs.readFileSync(`${__dirname}/../io-package.json`, 'utf8');
+        const fileContentIOPackage = fs.readFileSync(`${adapterDir}/io-package.json`, 'utf8');
         const ioPackage = JSON.parse(fileContentIOPackage);
 
-        const fileContentNPMPackage = fs.readFileSync(`${__dirname}/../package.json`, 'utf8');
+        const fileContentNPMPackage = fs.readFileSync(`${adapterDir}/package.json`, 'utf8');
         const npmPackage = JSON.parse(fileContentNPMPackage);
 
         expect(ioPackage).to.be.an('object');
@@ -49,7 +52,7 @@ describe('Test package.json and io-package.json', () => {
             console.log();
         }
 
-        expect(fs.existsSync(`${__dirname}/../README.md`), 'ERROR: README.md needs to exist! Please create one with description, detail information and changelog. English is mandatory.').to.be.true;
+        expect(fs.existsSync(`${adapterDir}/README.md`), 'ERROR: README.md needs to exist! Please create one with description, detail information and changelog. English is mandatory.').to.be.true;
 
         if (!ioPackage.common.titleLang || typeof ioPackage.common.titleLang !== 'object') {
             console.log('WARNING: titleLang is not existing in io-package.json. Please add');
@@ -67,13 +70,13 @@ describe('Test package.json and io-package.json', () => {
         }
 
         if (!ioPackage.common.controller && !ioPackage.common.onlyWWW && !ioPackage.common.noConfig) {
-            if (ioPackage.common.materialize) {
-                expect(fs.existsSync(`${__dirname}/../admin/index_m.html`), 'Admin3 support is enabled in io-package.json, but index_m.html is missing!').to.be.true;
+            if (ioPackage.common.materialize || (ioPackage.common.adminUI && ioPackage.common.adminUI.conifg === 'materialize')) {
+                expect(fs.existsSync(`${adapterDir}/admin/index_m.html`), 'Admin3 support is enabled in io-package.json, but index_m.html is missing!').to.be.true;
             }
         }
 
-        const licenseFileExists = fs.existsSync(`${__dirname}/../LICENSE`);
-        const fileContentReadme = fs.readFileSync(`${__dirname}/../README.md`, 'utf8');
+        const licenseFileExists = fs.existsSync(`${adapterDir}/LICENSE`);
+        const fileContentReadme = fs.readFileSync(`${adapterDir}/README.md`, 'utf8');
 
         if (!fileContentReadme.includes('## Changelog')) {
             console.log('Warning: The README.md should have a section ## Changelog');
