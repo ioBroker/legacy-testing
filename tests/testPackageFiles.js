@@ -73,6 +73,15 @@ describe('Test package.json and io-package.json', () => {
             if (ioPackage.common.materialize || (ioPackage.common.adminUI && ioPackage.common.adminUI.conifg === 'materialize')) {
                 expect(fs.existsSync(`${adapterDir}/admin/index_m.html`), 'Admin3 support is enabled in io-package.json, but index_m.html is missing!').to.be.true;
             }
+            if (ioPackage.common.jsonConfig || (ioPackage.common.adminUI && ioPackage.common.adminUI.conifg === 'json')) {
+                expect(fs.existsSync(`${adapterDir}/admin/jsonConfig.json`) || fs.existsSync(`${adapterDir}/admin/jsonConfig.json5`), 'Admin3 support is enabled in io-package.json, but jsonConfig.json(5) is missing!').to.be.true;
+            }
+            if (ioPackage.common.adminUI && ioPackage.common.adminUI.custom === 'json') {
+                expect(fs.existsSync(`${adapterDir}/admin/jsonCustom.json`) || fs.existsSync(`${adapterDir}/admin/jsonCustom.json5`), 'Custom config support is enabled in io-package.json, but jsonCustom.json(5) is missing!').to.be.true;
+            }
+            if (ioPackage.common.adminUI && ioPackage.common.adminUI.tab === 'html') {
+                expect(fs.existsSync(`${adapterDir}/admin/tab.html`) || fs.existsSync(`${adapterDir}/admin/tab_m.html`), 'HTML-Tab support is enabled in io-package.json, but tab(_m).html is missing!').to.be.true;
+            }
         }
 
         const licenseFileExists = fs.existsSync(`${adapterDir}/LICENSE`);
