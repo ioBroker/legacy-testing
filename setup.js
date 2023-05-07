@@ -944,6 +944,43 @@ async function getAdapterConfig(instance, customAdapterName, customInstance) {
     }
 }
 
+async function setOfflineState(id, state) {
+    if (fs.existsSync(`${rootDir}tmp/${appName}-data/states.json`)) {
+        const states = JSON.parse(fs.readFileSync(`${rootDir}tmp/${appName}-data/states.json`).toString());
+        states[id] = state;
+        fs.writeFileSync(`${rootDir}tmp/${appName}-data/states.json`, JSON.stringify(objects));
+    } else if (fs.existsSync(`${rootDir}tmp/${appName}-data/states.jsonl`)) {
+        loadJSONLDB();
+        const db = new JSONLDB(`${rootDir}tmp/${appName}-data/states.jsonl`);
+        await db.open();
+
+        db.set(id, state);
+
+        await db.close();
+    } else {
+        console.error(`setAdapterConfig: No objects file found in datadir ${rootDir}tmp/${appName}-data/`);
+    }
+}
+
+// Read config of the adapter
+async function getOfflineState(id) {
+    if (fs.existsSync(`${rootDir}tmp/${appName}-data/states.json`)) {
+        const states = JSON.parse(fs.readFileSync(`${rootDir}tmp/${appName}-data/states.json`).toString());
+        return states[id];
+    } else if (fs.existsSync(`${rootDir}tmp/${appName}-data/states.jsonl`)) {
+        loadJSONLDB();
+        const db = new JSONLDB(`${rootDir}tmp/${appName}-data/states.jsonl`);
+        await db.open();
+
+        const state = db.get(id);
+
+        await db.close();
+        return state;
+    } else {
+        console.error(`getAdapterConfig: No objects file found in datadir ${rootDir}tmp/${appName}-data/`);
+    }
+}
+
 if (typeof module !== undefined && module.parent) {
     module.exports.getAdapterConfig = getAdapterConfig;
     module.exports.setAdapterConfig = setAdapterConfig;
@@ -958,4 +995,6 @@ if (typeof module !== undefined && module.parent) {
     module.exports.adapterStarted   = adapterStarted;
     module.exports.getSecret        = getSecret;
     module.exports.encrypt          = encrypt;
+    module.exports.setOfflineState  = setOfflineState;
+    module.exports.getOfflineState  = getOfflineState;
 }
