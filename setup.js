@@ -15,13 +15,20 @@ let JSONLDB;
 
 let adapterName = path.normalize(rootDir).replace(/\\/g, '/').split('/');
 adapterName = adapterName[adapterName.length - 2];
-let adapterStarted = false;
+const adaptersStarted = {};
+const pids = {};
+
+let objects;
+let states;
+let systemConfig = null;
 
 function getAppName() {
     const parts = rootDir.replace(/\\/g, '/').split('/');
     parts.pop();
     return parts.pop().split('.')[0];
 }
+
+const appName = getAppName().toLowerCase();
 
 function loadJSONLDB() {
     if (!JSONLDB) {
@@ -37,15 +44,6 @@ function loadJSONLDB() {
         }
     }
 }
-
-const appName = getAppName().toLowerCase();
-
-let objects;
-let states;
-
-let pid = null;
-
-let systemConfig = null;
 
 function copyFileSync(source, target) {
     let targetFile = target;
@@ -668,24 +666,25 @@ function encrypt (key, value) {
 }
 
 function startAdapter(objects, states, callback) {
-    if (adapterStarted) {
+    const id = `${pkg.name}.0`;
+    if (adaptersStarted[id]) {
         console.log('Adapter already started ...');
         callback && callback(objects, states);
         return;
     }
-    adapterStarted = true;
+    adaptersStarted[id] = true;
     console.log('startAdapter...');
     if (fs.existsSync(`${rootDir}tmp/node_modules/${pkg.name}/${pkg.main}`)) {
         try {
             if (debug) {
                 // start controller
-                pid = child_process.exec(`node node_modules/${pkg.name}/${pkg.main} --console silly`, {
+                pids[id] = child_process.exec(`node node_modules/${pkg.name}/${pkg.main} --console silly`, {
                     cwd: `${rootDir}tmp`,
                     stdio: [0, 1, 2]
                 });
             } else {
                 // start controller
-                pid = child_process.fork(`node_modules/${pkg.name}/${pkg.main}`, ['--console', 'silly'], {
+                pids[id] = child_process.fork(`node_modules/${pkg.name}/${pkg.main}`, ['--console', 'silly'], {
                     cwd:   `${rootDir}tmp`,
                     stdio: [0, 1, 2, 'ipc']
                 });
@@ -697,6 +696,39 @@ function startAdapter(objects, states, callback) {
         console.error(`Cannot find: ${rootDir}tmp/node_modules/${pkg.name}/${pkg.main}`);
     }
     callback && callback(objects, states);
+}
+
+function startCustomAdapter(adapterName, adapterInstance) {
+    adapterInstance = adapterInstance || 0;
+    const id = `${adapterName}.${adapterInstance}`;
+    if (adaptersStarted[id]) {
+        console.log(`Adapter ${id} already started ...`);
+        return;
+    }
+    adaptersStarted[`${id}`] = true;
+    console.log(`startAdapter ${id} ...`);
+    const _pkg = require(`${rootDir}tmp/node_modules/iobroker.${adapterName}/package.json`);
+    if (fs.existsSync(`${rootDir}tmp/node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'}`)) {
+        try {
+            if (debug) {
+                // start controller
+                pids[`${pkg.name}.0`] = child_process.exec(`node node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'} ${adapterInstance} --console silly`, {
+                    cwd: `${rootDir}tmp`,
+                    stdio: [0, 1, 2]
+                });
+            } else {
+                // start controller
+                pids[`${pkg.name}.0`] = child_process.fork(`node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'}`, [adapterInstance, '--console', 'silly'], {
+                    cwd:   `${rootDir}tmp`,
+                    stdio: [0, 1, 2, 'ipc']
+                });
+            }
+        } catch (error) {
+            console.error(JSON.stringify(error));
+        }
+    } else {
+        console.error(`Cannot find: ${rootDir}tmp/node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'}`);
+    }
 }
 
 function startController(isStartAdapter, onObjectChange, onStateChange, callback) {
@@ -712,14 +744,14 @@ function startController(isStartAdapter, onObjectChange, onStateChange, callback
         onObjectChange = undefined;
     }
 
-    if (pid) {
+    if (pids[`${pkg.name}.0`]) {
         console.error('Controller is already started!');
     } else {
         console.log('startController...');
         try {
             const config = require(`${rootDir}tmp/${appName}-data/${appName}.json`);
 
-            adapterStarted = false;
+            adaptersStarted[`${pkg.name}.0`] = false;
             let isObjectConnected;
             let isStatesConnected;
 
@@ -819,27 +851,56 @@ function startController(isStartAdapter, onObjectChange, onStateChange, callback
 }
 
 function stopAdapter(cb) {
-    if (!pid) {
+    const id = `${pkg.name}.0`;
+    if (!pids[id]) {
         console.error('Controller is not running!');
         cb && setTimeout(() => cb(false), 0);
     } else {
-        adapterStarted = false;
-        pid.on('exit', (code, signal) => {
-            if (pid) {
+        adaptersStarted[id] = false;
+        pids[id].on('exit', (code, signal) => {
+            if (pids[id]) {
                 console.log(`child process terminated due to receipt of signal ${signal}`);
                 cb && cb();
-                pid = null;
+                pids[id] = null;
             }
         });
 
-        pid.on('close', (/* code, signal */) => {
-            if (pid) {
+        pids[id].on('close', (/* code, signal */) => {
+            if (pids[id]) {
                 cb && cb();
-                pid = null;
+                pids[id] = null;
             }
         });
 
-        pid.kill('SIGTERM');
+        pids[id].kill('SIGTERM');
+    }
+}
+
+function stopCustomAdapter(adapterName, adapterInstance) {
+    const id = `${pkg.name}.0`;
+    if (!pids[id]) {
+        console.error('Controller is not running!');
+        return Promise.resolve()
+    } else {
+        adaptersStarted[id] = false;
+        return new Promise(resolve => {
+            pids[id].on('exit', (code, signal) => {
+                if (pids[id]) {
+                    console.log(`child process terminated due to receipt of signal ${signal}`);
+                    pids[id] = null;
+                    resolve();
+                }
+            });
+
+            pids[id].on('close', (/* code, signal */) => {
+                if (pids[id]) {
+                    pids[id] = null;
+                    resolve();
+                }
+            });
+
+            pids[id].kill('SIGTERM');
+        });
     }
 }
 
@@ -889,7 +950,7 @@ function stopController(cb) {
             cb(false);
             cb = null;
         }
-        pid = null;
+        pids[`${pkg.name}.0`] = null;
     }, 5000);
 }
 
@@ -993,9 +1054,10 @@ if (typeof module !== undefined && module.parent) {
     module.exports.installAdapter   = installAdapter;
     module.exports.appName          = appName;
     module.exports.adapterName      = adapterName;
-    module.exports.adapterStarted   = adapterStarted;
     module.exports.getSecret        = getSecret;
     module.exports.encrypt          = encrypt;
     module.exports.setOfflineState  = setOfflineState;
     module.exports.getOfflineState  = getOfflineState;
+    module.exports.stopCustomAdapter = stopCustomAdapter;
+    module.exports.startCustomAdapter = startCustomAdapter;
 }
