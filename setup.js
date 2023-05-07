@@ -663,22 +663,22 @@ function startCustomAdapter(adapterName, adapterInstance) {
         console.log(`Adapter ${id} already started ...`);
         return;
     }
-    adaptersStarted[`${id}`] = true;
+    adaptersStarted[id] = true;
     console.log(`startAdapter ${id} ...`);
     const _pkg = require(`${rootDir}tmp/node_modules/iobroker.${adapterName}/package.json`);
     if (fs.existsSync(`${rootDir}tmp/node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'}`)) {
         try {
             if (debug) {
                 // start controller
-                pids[`${pkg.name}.0`] = child_process.exec(`node node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'} ${adapterInstance} --debug --console silly`, {
+                pids[id] = child_process.exec(`node node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'} ${adapterInstance} --debug --console silly`, {
                     cwd: `${rootDir}tmp`,
-                    stdio: [0, 1, 2]
+                    stdio: [0, 1, 2],
                 });
             } else {
                 // start controller
-                pids[`${pkg.name}.0`] = child_process.fork(`node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'}`, [adapterInstance, '--debug ', '--console', 'silly'], {
+                pids[id] = child_process.fork(`node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'}`, [adapterInstance, '--debug ', '--console', 'silly'], {
                     cwd:   `${rootDir}tmp`,
-                    stdio: [0, 1, 2, 'ipc']
+                    stdio: [0, 1, 2, 'ipc'],
                 });
             }
         } catch (error) {
@@ -835,10 +835,10 @@ function stopAdapter(cb) {
 }
 
 function stopCustomAdapter(adapterName, adapterInstance) {
-    const id = `${pkg.name}.0`;
+    const id = `${adapterName}.${adapterInstance || 0}`;
     if (!pids[id]) {
-        console.error('Controller is not running!');
-        return Promise.resolve()
+        console.error(`Adapter instance ${id} is not running!`);
+        return Promise.resolve();
     } else {
         adaptersStarted[id] = false;
         return new Promise(resolve => {
