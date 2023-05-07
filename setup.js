@@ -432,7 +432,8 @@ function installJsController(preInstalledAdapters, cb) {
             });
         } else {
             // check if port 9000 is free, else admin adapter will be added to running instance
-            const client = new require('net').Socket();
+            const { Socket } = require('net')
+            const client = new Socket();
             client.on('error', () => {});
             client.connect(9000, '127.0.0.1', () => {
                 console.error('Cannot initiate the first run of test, because one instance of application is running on this PC. Stop it and repeat.');
