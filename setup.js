@@ -8,6 +8,7 @@ const path          = require('path');
 const child_process = require('child_process');
 const rootDir       = path.normalize(`${__dirname}/../../../`);
 const pkg           = require(`${rootDir}package.json`);
+const cp            = require('child_process');
 const debug         = typeof v8debug === 'object';
 pkg.main = pkg.main || 'main.js';
 
@@ -187,54 +188,26 @@ async function checkIsAdapterInstalled(cb, counter, customAdapterName, customIns
     customAdapterName = customAdapterName || pkg.name.split('.').pop();
     counter = counter || 0;
     const dataDir = `${rootDir}tmp/${appName}-data/`;
-    console.log('checkIsAdapterInstalled...');
+    console.log(`[${customAdapterName}] checkIsAdapterInstalled...`);
 
     try {
-        if (fs.existsSync(`${dataDir}objects.json`)) {
-            const f = fs.readFileSync(`${dataDir}objects.json`);
-            const objects = JSON.parse(f.toString());
-            if (objects[`system.adapter.${customAdapterName}.${customInstance || 0}`]) {
-                console.log('checkIsAdapterInstalled: ready!');
-                setTimeout(() => cb && cb(), 100);
-                return;
-            } else {
-                console.warn('checkIsAdapterInstalled: still not ready');
-            }
-        } else if (fs.existsSync(`${dataDir}objects.jsonl`)) {
-            loadJSONLDB();
-            const db = new JSONLDB(`${dataDir}objects.jsonl`);
-            try {
-                await db.open();
-            } catch (err) {
-                if (err.message.includes('Failed to lock DB file')) {
-                    console.log('checkIsAdapterInstalled: DB still opened ...');
-                }
-                throw err;
-            }
-
-            const obj = db.get(`system.adapter.${customAdapterName}.${customInstance || 0}`);
-            await db.close();
-
-            if (obj) {
-                console.log('checkIsAdapterInstalled: ready!');
-                setTimeout(() => cb && cb(), 100);
-                return;
-            } else {
-                console.warn('checkIsAdapterInstalled: still not ready');
-            }
+        const obj = await getObject(`system.adapter.${customAdapterName}.${customInstance || 0}`)
+        if (obj) {
+            console.log(`[${customAdapterName}] checkIsAdapterInstalled: ready!`);
+            setTimeout(() => cb && cb(), 100);
+            return;
         } else {
-            console.error(`checkIsAdapterInstalled: No objects file found in datadir ${dataDir}`);
+            console.warn(`[${customAdapterName}] checkIsAdapterInstalled: still not ready`);
         }
-
     } catch (err) {
-        console.log(`checkIsAdapterInstalled: catch ${err}`);
+        console.log(`[${customAdapterName}] checkIsAdapterInstalled: catch ${err}`);
     }
 
     if (counter > 20) {
-        console.error('checkIsAdapterInstalled: Cannot install!');
+        console.error(`[${customAdapterName}] checkIsAdapterInstalled: Cannot install!`);
         cb && cb('Cannot install');
     } else {
-        console.log('checkIsAdapterInstalled: wait...');
+        console.log(`[${customAdapterName}] checkIsAdapterInstalled: wait...`);
         setTimeout(() => checkIsAdapterInstalled(cb, counter + 1, customAdapterName, customInstance), 1000);
     }
 }
@@ -245,37 +218,11 @@ async function checkIsControllerInstalled(cb, counter) {
 
     console.log('checkIsControllerInstalled...');
     try {
-        if (fs.existsSync(`${dataDir}objects.json`)) {
-            const f = fs.readFileSync(`${dataDir}objects.json`);
-            const objects = JSON.parse(f.toString());
-            if (objects['system.certificates']) {
-                console.log('checkIsControllerInstalled: installed!');
-                setTimeout(() => cb && cb(), 100);
-                return;
-            }
-        } else if (fs.existsSync(`${dataDir}objects.jsonl`)) {
-            loadJSONLDB();
-            const db = new JSONLDB(`${dataDir}objects.jsonl`);
-            try {
-                await db.open();
-            } catch (err) {
-                if (err.message.includes('Failed to lock DB file')) {
-                    console.log('checkIsControllerInstalled: DB still opened ...');
-                }
-                throw err;
-            }
-
-            const obj = db.get('system.certificates');
-            await db.close();
-
-            if (obj) {
-                console.log('checkIsControllerInstalled: installed!');
-                setTimeout(() => cb && cb(), 100);
-                return;
-            }
-
-        } else {
-            console.error(`checkIsControllerInstalled: No objects file found in datadir ${dataDir}`);
+        const obj = await getObject('system.certificates');
+        if (obj) {
+            console.log('checkIsControllerInstalled: installed!');
+            setTimeout(() => cb && cb(), 100);
+            return;
         }
     } catch (err) {
         // ignore
@@ -296,7 +243,12 @@ function installAdapter(customAdapterName, cb) {
         customAdapterName = null;
     }
     customAdapterName = customAdapterName || pkg.name.split('.').pop();
-    console.log('Install adapter...');
+    console.log(`[${customAdapterName}] Install adapter...`);
+
+    if (customAdapterName.includes('@')) {
+        installCustomAdapter(customAdapterName);
+    }
+
     const startFile = `node_modules/${appName}.js-controller/${appName}.js`;
     // make first install
     if (debug) {
@@ -306,7 +258,7 @@ function installAdapter(customAdapterName, cb) {
         });
         checkIsAdapterInstalled(error => {
             error && console.error(error);
-            console.log('Adapter installed.');
+            console.log(`[${customAdapterName}] Adapter installed.`);
             cb && cb();
         }, 0, customAdapterName);
     } else {
@@ -319,7 +271,7 @@ function installAdapter(customAdapterName, cb) {
         waitForEnd(_pid, () =>
             checkIsAdapterInstalled(error => {
                 error && console.error(error);
-                console.log('Adapter installed.');
+                console.log(`[${customAdapterName}] Adapter installed.`);
                 cb && cb();
             }, 0, customAdapterName));
     }
@@ -514,6 +466,16 @@ function copyAdapterToController() {
     console.log('Adapter copied.');
 }
 
+function installCustomAdapter(adapterName) {
+    if (!fs.existsSync(`${rootDir}tmp/node_modules/${adapterName}`)) {
+        console.log(`Install ${adapterName}`);
+        cp.execSync(`npm install ${adapterName} --prefix ./ --production`, {
+            cwd:   `${rootDir}tmp/`,
+            stdio: [0, 1, 2],
+        });
+    }
+}
+
 function clearControllerLog() {
     const dirPath = `${rootDir}tmp/log`;
     let files;
@@ -582,42 +544,65 @@ function setupController(preInstalledAdapters, cb) {
                 restoreOriginalFiles();
                 copyAdapterToController();
             }
+
             // read system.config object
-            const dataDir = `${rootDir}tmp/${appName}-data/`;
-
-            if (fs.existsSync(`${dataDir}objects.json`)) {
-                let objs;
-                try {
-                    objs = fs.readFileSync(`${dataDir}objects.json`);
-                    objs = JSON.parse(objs);
-                } catch (e) {
-                    console.log('ERROR reading/parsing system configuration. Ignore');
-                    objs = {'system.config': {}};
-                }
-                if (!objs || !objs['system.config']) {
-                    objs = {'system.config': {}};
-                }
-
-                systemConfig = objs['system.config'];
-                cb && cb(objs['system.config']);
-            } else if (fs.existsSync(`${dataDir}objects.jsonl`)) {
-                loadJSONLDB();
-                const db = new JSONLDB(`${dataDir}objects.jsonl`);
-                await db.open();
-
-                const config = db.get('system.config');
-                systemConfig = config || {};
-
-                await db.close();
-
-                cb && cb(systemConfig);
-            } else {
-                console.error(`read SystemConfig: No objects file found in datadir ${dataDir}`);
-            }
+            const config = await getObject('system.config');
+            systemConfig = config || {};
+            cb && cb(systemConfig);
         } catch (err) {
             console.error(`setupController: ${err}`);
         }
     });
+}
+
+async function getObject(id){
+    if (fs.existsSync(`${rootDir}tmp/${appName}-data/objects.json`)) {
+        const objects = JSON.parse(fs.readFileSync(`${rootDir}tmp/${appName}-data/objects.json`).toString());
+        return objects[id];
+    } else if (fs.existsSync(`${rootDir}tmp/${appName}-data/objects.jsonl`)) {
+        loadJSONLDB();
+        const db = new JSONLDB(`${rootDir}tmp/${appName}-data/objects.jsonl`);
+        try {
+            await db.open();
+        } catch (err) {
+            if (err.message.includes('Failed to lock DB file')) {
+                console.log(`getObject: DB still opened ...`);
+            }
+            throw err;
+        }
+
+        const obj = db.get(id) || {};
+        await db.close();
+        return obj;
+    } else {
+        console.error(`setAdapterConfig: No objects file found in datadir ${rootDir}tmp/${appName}-data/`);
+        return null;
+    }
+}
+
+async function setObject(id, obj){
+    if (fs.existsSync(`${rootDir}tmp/${appName}-data/objects.json`)) {
+        const objects = JSON.parse(fs.readFileSync(`${rootDir}tmp/${appName}-data/objects.json`).toString());
+        objects[id] = obj;
+    } else if (fs.existsSync(`${rootDir}tmp/${appName}-data/objects.jsonl`)) {
+        loadJSONLDB();
+        const db = new JSONLDB(`${rootDir}tmp/${appName}-data/objects.jsonl`);
+        try {
+            await db.open();
+        } catch (err) {
+            if (err.message.includes('Failed to lock DB file')) {
+                console.log(`getObject: DB still opened ...`);
+            }
+            throw err;
+        }
+
+        db.set(id, obj);
+        await db.close();
+        return obj;
+    } else {
+        console.error(`setAdapterConfig: No objects file found in datadir ${rootDir}tmp/${appName}-data/`);
+        return null;
+    }
 }
 
 async function getSecret() {
@@ -626,35 +611,8 @@ async function getSecret() {
     if (systemConfig) {
         return systemConfig.native.secret;
     }
-    if (fs.existsSync(`${dataDir}objects.json`)) {
-        let objs;
-        try {
-            objs = fs.readFileSync(`${dataDir}objects.json`);
-            objs = JSON.parse(objs);
-        } catch (e) {
-            console.warn(`Could not load secret. Reason: ${e}`);
-            return null;
-        }
-        if (!objs || !objs['system.config']) {
-            objs = {'system.config': {}};
-        }
-
-        return objs['system.config'].native.secre;
-    } else if (fs.existsSync(`${dataDir}objects.jsonl`)) {
-        loadJSONLDB();
-        const db = new JSONLDB(`${dataDir}objects.jsonl`);
-        await db.open();
-
-        let config = db.get('system.config');
-        config = config || {};
-
-        await db.close();
-
-        return config.native.secret;
-    } else {
-        console.error(`read secret: No objects file found in datadir ${dataDir}`);
-    }
-
+    systemConfig = await getObject('system.config');
+    return systemConfig.native.secret;
 }
 
 function encrypt (key, value) {
@@ -712,13 +670,13 @@ function startCustomAdapter(adapterName, adapterInstance) {
         try {
             if (debug) {
                 // start controller
-                pids[`${pkg.name}.0`] = child_process.exec(`node node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'} ${adapterInstance} --console silly`, {
+                pids[`${pkg.name}.0`] = child_process.exec(`node node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'} ${adapterInstance} --debug --console silly`, {
                     cwd: `${rootDir}tmp`,
                     stdio: [0, 1, 2]
                 });
             } else {
                 // start controller
-                pids[`${pkg.name}.0`] = child_process.fork(`node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'}`, [adapterInstance, '--console', 'silly'], {
+                pids[`${pkg.name}.0`] = child_process.fork(`node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'}`, [adapterInstance, '--debug ', '--console', 'silly'], {
                     cwd:   `${rootDir}tmp`,
                     stdio: [0, 1, 2, 'ipc']
                 });
@@ -921,8 +879,8 @@ function stopController(cb) {
         console.log(`Set system.adapter.${pkg.name}.0`);
         objects.setObject(`system.adapter.${pkg.name}.0`, {
             common: {
-                enabled: false
-            }
+                enabled: false,
+            },
         });
     }
 
@@ -956,54 +914,20 @@ function stopController(cb) {
 
 // Set up the adapter
 async function setAdapterConfig(common, native, instance, customAdapterName) {
-    const id = `system.adapter.${(adapterName || customAdapterName).split('.').pop()}.${instance || 0}`;
-    if (fs.existsSync(`${rootDir}tmp/${appName}-data/objects.json`)) {
-        const objects = JSON.parse(fs.readFileSync(`${rootDir}tmp/${appName}-data/objects.json`).toString());
-        if (common) {
-            objects[id].common = common;
-        }
-        if (native) {
-            objects[id].native = native;
-        }
-        fs.writeFileSync(`${rootDir}tmp/${appName}-data/objects.json`, JSON.stringify(objects));
-    } else if (fs.existsSync(`${rootDir}tmp/${appName}-data/objects.jsonl`)) {
-        loadJSONLDB();
-        const db = new JSONLDB(`${rootDir}tmp/${appName}-data/objects.jsonl`);
-        await db.open();
-
-        const obj = db.get(id);
-        if (common) {
-            obj.common = common;
-        }
-        if (native) {
-            obj.native = native;
-        }
-        db.set(id, obj);
-
-        await db.close();
-    } else {
-        console.error(`setAdapterConfig: No objects file found in datadir ${rootDir}tmp/${appName}-data/`);
+    const id = `system.adapter.${(customAdapterName || adapterName).split('.').pop()}.${instance || 0}`;
+    const obj = (await getObject(id)) || {};
+    if (common) {
+        obj.common = common;
     }
+    if (native) {
+        obj.native = native;
+    }
+    await setObject(id, obj);
 }
 
 // Read config of the adapter
 async function getAdapterConfig(instance, customAdapterName) {
-    const id = `system.adapter.${(adapterName || customAdapterName).split('.').pop()}.${instance || 0}`;
-    if (fs.existsSync(`${rootDir}tmp/${appName}-data/objects.json`)) {
-        const objects = JSON.parse(fs.readFileSync(`${rootDir}tmp/${appName}-data/objects.json`).toString());
-        return objects[id];
-    } else if (fs.existsSync(`${rootDir}tmp/${appName}-data/objects.jsonl`)) {
-        loadJSONLDB();
-        const db = new JSONLDB(`${rootDir}tmp/${appName}-data/objects.jsonl`);
-        await db.open();
-
-        const obj = db.get(id);
-
-        await db.close();
-        return obj;
-    } else {
-        console.error(`getAdapterConfig: No objects file found in datadir ${rootDir}tmp/${appName}-data/`);
-    }
+    return getObject(`system.adapter.${(customAdapterName || adapterName).split('.').pop()}.${instance || 0}`);
 }
 
 async function setOfflineState(id, state) {
@@ -1046,18 +970,21 @@ async function getOfflineState(id) {
 if (typeof module !== undefined && module.parent) {
     module.exports.getAdapterConfig = getAdapterConfig;
     module.exports.setAdapterConfig = setAdapterConfig;
-    module.exports.startController  = startController;
-    module.exports.stopController   = stopController;
-    module.exports.setupController  = setupController;
-    module.exports.stopAdapter      = stopAdapter;
-    module.exports.startAdapter     = startAdapter;
-    module.exports.installAdapter   = installAdapter;
-    module.exports.appName          = appName;
-    module.exports.adapterName      = adapterName;
-    module.exports.getSecret        = getSecret;
-    module.exports.encrypt          = encrypt;
-    module.exports.setOfflineState  = setOfflineState;
-    module.exports.getOfflineState  = getOfflineState;
+    module.exports.startController = startController;
+    module.exports.stopController = stopController;
+    module.exports.setupController = setupController;
+    module.exports.stopAdapter = stopAdapter;
+    module.exports.startAdapter = startAdapter;
+    module.exports.installAdapter = installAdapter;
+    module.exports.appName = appName;
+    module.exports.adapterName = adapterName;
+    module.exports.getSecret = getSecret;
+    module.exports.encrypt = encrypt;
+    module.exports.setOfflineState = setOfflineState;
+    module.exports.getOfflineState = getOfflineState;
     module.exports.stopCustomAdapter = stopCustomAdapter;
     module.exports.startCustomAdapter = startCustomAdapter;
+    module.exports.installCustomAdapter = installCustomAdapter;
+    module.exports.getObject = getObject;
+    module.exports.setObject = setObject;
 }
