@@ -894,8 +894,8 @@ function stopController(cb) {
 }
 
 // Set up the adapter
-async function setAdapterConfig(common, native, instance, customAdapterName, customInstance) {
-    const id = `system.adapter.${(adapterName || customAdapterName).split('.').pop()}.${customInstance === undefined ? instance || 0 : customInstance}`;
+async function setAdapterConfig(common, native, instance, customAdapterName) {
+    const id = `system.adapter.${(adapterName || customAdapterName).split('.').pop()}.${instance || 0}`;
     if (fs.existsSync(`${rootDir}tmp/${appName}-data/objects.json`)) {
         const objects = JSON.parse(fs.readFileSync(`${rootDir}tmp/${appName}-data/objects.json`).toString());
         if (common) {
@@ -926,8 +926,8 @@ async function setAdapterConfig(common, native, instance, customAdapterName, cus
 }
 
 // Read config of the adapter
-async function getAdapterConfig(instance, customAdapterName, customInstance) {
-    const id = `system.adapter.${(adapterName || customAdapterName).split('.').pop()}.${customInstance === undefined ? instance || 0 : customInstance}`;
+async function getAdapterConfig(instance, customAdapterName) {
+    const id = `system.adapter.${(adapterName || customAdapterName).split('.').pop()}.${instance || 0}`;
     if (fs.existsSync(`${rootDir}tmp/${appName}-data/objects.json`)) {
         const objects = JSON.parse(fs.readFileSync(`${rootDir}tmp/${appName}-data/objects.json`).toString());
         return objects[id];
