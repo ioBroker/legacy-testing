@@ -573,8 +573,8 @@ function clearDB() {
     }
 }
 
-function setupController(cb) {
-    installJsController(async isInitialized => {
+function setupController(preInstalledAdapters, cb) {
+    installJsController(preInstalledAdapters, async isInitialized => {
         try {
             clearControllerLog();
             clearDB();
