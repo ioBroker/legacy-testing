@@ -11,6 +11,9 @@ Legacy test modules for ioBroker
 
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
+### **WORK IN PROGRESS**
+* (bluefox) Added possibility to install additional adapters at start
+
 ### 0.1.1 (2022-12-22)
 * (bluefox) Extended testPackageFiles.js with checks
 
