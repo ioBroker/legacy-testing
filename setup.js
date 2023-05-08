@@ -189,14 +189,13 @@ async function checkIsAdapterInstalled(cb, counter, customAdapterName, customIns
     console.log(`[${customAdapterName}] checkIsAdapterInstalled...`);
 
     try {
-        const obj = await getObject(`system.adapter.${customAdapterName}.${customInstance || 0}`)
-        if (obj) {
-            console.log(`[${customAdapterName}] checkIsAdapterInstalled: ready!`);
+        const obj = await getObject(`system.adapter.${customAdapterName}.${customInstance || 0}`);
+        if (obj && obj.common) {
+            console.log(`[${customAdapterName}] checkIsAdapterInstalled: ready! ${JSON.stringify(obj)}`);
             setTimeout(() => cb && cb(), 100);
             return;
-        } else {
-            console.warn(`[${customAdapterName}] checkIsAdapterInstalled: still not ready`);
         }
+        console.warn(`[${customAdapterName}] checkIsAdapterInstalled: still not ready`);
     } catch (err) {
         console.log(`[${customAdapterName}] checkIsAdapterInstalled: catch ${err}`);
     }
@@ -228,7 +227,7 @@ async function checkIsControllerInstalled(cb, counter) {
     console.log('checkIsControllerInstalled...');
     try {
         const obj = await getObject('system.certificates');
-        if (obj) {
+        if (obj && obj.common) {
             console.log('checkIsControllerInstalled: installed!');
             setTimeout(() => cb && cb(), 100);
             return;
@@ -287,7 +286,32 @@ async function installAdapter(customAdapterName, cb) {
         await waitForEndAsync(_pid);
     }
 
-    await checkIsAdapterInstalledAsync(null, customAdapterName);
+    const name = (customAdapterName.split('@')[0]).split('.').pop(); // extract from iobroker.adaptername@version => adaptername
+
+    try {
+        await checkIsAdapterInstalledAsync(null, name);
+    } catch (err) {
+        console.warn(`[${customAdapterName}] Adapter not installed: ${err}`);
+        // try workaround
+        installCustomAdapter(customAdapterName);
+        const startFile = `node_modules/${appName}.js-controller/${appName}.js`;
+        // make first install
+        if (debug) {
+            cp.execSync(`node ${startFile} add ${customAdapterName} --enabled false`, {
+                cwd:   `${rootDir}tmp`,
+                stdio: [0, 1, 2],
+            });
+        } else {
+            // add controller
+            const _pid = cp.fork(startFile, ['add', customAdapterName, '--enabled', 'false'], {
+                cwd:   `${rootDir}tmp`,
+                stdio: [0, 1, 2, 'ipc'],
+            });
+
+            await waitForEndAsync(_pid);
+        }
+        await checkIsAdapterInstalledAsync(null, name);
+    }
     console.log(`[${customAdapterName}] Adapter installed.`);
     cb && cb();
 }
