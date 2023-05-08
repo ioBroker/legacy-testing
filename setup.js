@@ -262,13 +262,9 @@ async function installAdapter(customAdapterName, cb) {
         cb = customAdapterName;
         customAdapterName = null;
     }
-    console.log(`[${customAdapterName || pkg.name}] Install adapter...`);
 
-    // if own adapter
-    if (!customAdapterName) {
-        installCustomAdapter(pkg.name); // force install from the current directory
-        customAdapterName = pkg.name;
-    }
+    customAdapterName = customAdapterName || pkg.name;
+    console.log(`[${customAdapterName}] Install adapter...`);
 
     if (customAdapterName.includes('@')) {
         installCustomAdapter(customAdapterName);
@@ -461,9 +457,20 @@ async function installJsController(preInstalledAdapters, cb) {
 }
 
 function copyAdapterToController() {
-    console.log('Copy adapter...');
-    // Copy adapter to tmp/node_modules/appName.adapter
-    copyFolderRecursiveSync(rootDir, `${rootDir}tmp/node_modules/`, ['node_modules', '.github', '.idea', 'test', 'tmp', '.git', 'src', 'src-widgets', `${appName}.js-controller`]);
+    console.log('Pack adapter...');
+
+    fs.existsSync(`${rootDir}${pkg.name}-${pkg.version}.tgz`) && fs.unlinkSync(`${rootDir}${pkg.name}-${pkg.version}.tgz`);
+    fs.existsSync(`${rootDir}tmp/${pkg.name}-${pkg.version}.tgz`) && fs.unlinkSync(`${rootDir}tmp/${pkg.name}-${pkg.version}.tgz`);
+
+    cp.execSync(`npm pack`, {
+        cwd:   rootDir,
+        stdio: [0, 1, 2],
+    });
+    copyFileSync(`${rootDir}${pkg.name}-${pkg.version}.tgz`, `${rootDir}tmp/${pkg.name}-${pkg.version}.tgz`);
+    cp.execSync(`npm install ${pkg.name}-${pkg.version}.tgz --prefix ./ --production`, {
+        cwd:   `${rootDir}tmp`,
+        stdio: [0, 1, 2],
+    });
     console.log('Adapter copied.');
 }
 
