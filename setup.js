@@ -672,6 +672,7 @@ function startCustomAdapter(adapterName, adapterInstance) {
     adaptersStarted[id] = true;
     console.log(`startAdapter ${id} ...`);
     const _pkg = adapterName ? require(`${rootDir}tmp/node_modules/iobroker.${adapterName}/package.json`) : pkg;
+    adapterName = adapterName || pkg.name;
     if (fs.existsSync(`${rootDir}tmp/node_modules/iobroker.${adapterName}/${_pkg.main || 'main.js'}`)) {
         try {
             if (debug) {
