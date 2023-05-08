@@ -262,8 +262,13 @@ async function installAdapter(customAdapterName, cb) {
         cb = customAdapterName;
         customAdapterName = null;
     }
-    customAdapterName = customAdapterName || pkg.name;
-    console.log(`[${customAdapterName}] Install adapter...`);
+    console.log(`[${customAdapterName || pkg.name}] Install adapter...`);
+
+    // if own adapter
+    if (!customAdapterName) {
+        installCustomAdapter(pkg.name); // force install from the current directory
+        customAdapterName = pkg.name;
+    }
 
     if (customAdapterName.includes('@')) {
         installCustomAdapter(customAdapterName);
@@ -288,29 +293,7 @@ async function installAdapter(customAdapterName, cb) {
 
     const name = (customAdapterName.split('@')[0]).split('.').pop(); // extract from iobroker.adaptername@version => adaptername
 
-    try {
-        await checkIsAdapterInstalledAsync(null, name);
-    } catch (err) {
-        console.warn(`[${customAdapterName}] Adapter not installed: ${err}`);
-        // try workaround
-        installCustomAdapter(customAdapterName);
-        // make first install
-        if (debug) {
-            cp.execSync(`node ${startFile} add ${customAdapterName} --enabled false`, {
-                cwd:   `${rootDir}tmp`,
-                stdio: [0, 1, 2],
-            });
-        } else {
-            // add controller
-            const _pid = cp.fork(startFile, ['add', customAdapterName, '--enabled', 'false'], {
-                cwd:   `${rootDir}tmp`,
-                stdio: [0, 1, 2, 'ipc'],
-            });
-
-            await waitForEndAsync(_pid);
-        }
-        await checkIsAdapterInstalledAsync(null, name);
-    }
+    await checkIsAdapterInstalledAsync(null, name);
     console.log(`[${customAdapterName}] Adapter installed.`);
     cb && cb();
 }
@@ -318,25 +301,6 @@ async function installAdapter(customAdapterName, cb) {
 function installAdapterAsync(customAdapterName) {
     return new Promise(resolve =>
         installAdapter(customAdapterName, () => resolve()));
-}
-
-function waitForEnd(_pid, cb) {
-    if (!_pid) {
-        cb(-1, -1);
-    } else {
-        _pid.on('exit', (code, signal) => {
-            if (_pid) {
-                _pid = null;
-                cb(code, signal);
-            }
-        });
-        _pid.on('close', (code, signal) => {
-            if (_pid) {
-                _pid = null;
-                cb(code, signal);
-            }
-        });
-    }
 }
 
 function waitForEndAsync(_pid) {
@@ -414,13 +378,14 @@ async function installJsController(preInstalledAdapters, cb) {
                     stdio: [0, 1, 2, 'ipc']
                 });
             }
-            await waitForEnd(__pid);
+            await waitForEndAsync(__pid);
             await checkIsControllerInstalledAsync();
         } else {
             // check if port 9000 is free, else admin adapter will be added to running instance
             const {Socket} = require('net')
             const client = new Socket();
             client.on('error', () => {
+                // ignore
             });
             client.connect(9000, '127.0.0.1', () => {
                 console.error('Cannot initiate the first run of test, because one instance of application is running on this PC. Stop it and repeat.');
@@ -452,7 +417,7 @@ async function installJsController(preInstalledAdapters, cb) {
                         stdio: [0, 1, 2, 'ipc'],
                     });
                 }
-                await waitForEnd(__pid);
+                await waitForEndAsync(__pid);
             }
 
             // let npm install admin and run setup
@@ -498,7 +463,7 @@ async function installJsController(preInstalledAdapters, cb) {
 function copyAdapterToController() {
     console.log('Copy adapter...');
     // Copy adapter to tmp/node_modules/appName.adapter
-    copyFolderRecursiveSync(rootDir, `${rootDir}tmp/node_modules/`, ['.github', '.idea', 'test', 'tmp', '.git', 'src', 'src-widgets', `${appName}.js-controller`]);
+    copyFolderRecursiveSync(rootDir, `${rootDir}tmp/node_modules/`, ['node_modules', '.github', '.idea', 'test', 'tmp', '.git', 'src', 'src-widgets', `${appName}.js-controller`]);
     console.log('Adapter copied.');
 }
 

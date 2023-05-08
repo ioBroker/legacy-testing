@@ -11,7 +11,7 @@ Legacy test modules for ioBroker
 
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
-### 0.3.4 (2023-05-08)
+### **WORK IN PROGRESS**
 * (bluefox) Added possibility to install additional adapters at start
 * (bluefox) Added setOfflineState/getOfflineState
 
