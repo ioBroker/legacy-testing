@@ -709,9 +709,11 @@ function startController(isStartAdapter, onObjectChange, onStateChange, callback
         onObjectChange = undefined;
     }
 
-    if (pids[`${pkg.name}.0`]) {
+    if (pids.controller) {
         console.error('Controller is already started!');
     } else {
+        pids.controller = true;
+
         console.log('startController...');
         try {
             const config = require(`${rootDir}tmp/${appName}-data/${appName}.json`);
@@ -762,7 +764,7 @@ function startController(isStartAdapter, onObjectChange, onStateChange, callback
 
             // Just open in memory DB itself
             const statePath = require.resolve(`@iobroker/db-states-${config.states.type}`, {
-                paths: [ `${rootDir}tmp/node_modules`, rootDir, `${rootDir}tmp/node_modules/${appName}.js-controller`]
+                paths: [`${rootDir}tmp/node_modules`, rootDir, `${rootDir}tmp/node_modules/${appName}.js-controller`],
             });
             console.log(`States Path: ${statePath}`);
             const States = require(statePath).Server;
@@ -815,34 +817,13 @@ function startController(isStartAdapter, onObjectChange, onStateChange, callback
     }
 }
 
-function stopAdapter(cb) {
-    const id = `${pkg.name}.0`;
-    if (!pids[id]) {
-        console.error('Controller is not running!');
-        cb && setTimeout(() => cb(false), 0);
-    } else {
-        adaptersStarted[id] = false;
-        pids[id].on('exit', (code, signal) => {
-            if (pids[id]) {
-                console.log(`child process terminated due to receipt of signal ${signal}`);
-                cb && cb();
-                pids[id] = null;
-            }
-        });
-
-        pids[id].on('close', (/* code, signal */) => {
-            if (pids[id]) {
-                cb && cb();
-                pids[id] = null;
-            }
-        });
-
-        pids[id].kill('SIGTERM');
-    }
+async function stopAdapter(cb) {
+    await stopCustomAdapter();
+    cb && cb();
 }
 
 function stopCustomAdapter(adapterName, adapterInstance) {
-    const id = `${adapterName}.${adapterInstance || 0}`;
+    const id = `${adapterName || pkg.name.split('.')[1]}.${adapterInstance || 0}`;
     if (!pids[id]) {
         console.error(`Adapter instance ${id} is not running!`);
         return Promise.resolve();
@@ -881,10 +862,11 @@ function _stopController() {
 }
 
 function stopController(cb) {
+    const id = `${pkg.name.split('.')[1]}.0`;
     let timeout;
     if (objects) {
-        console.log(`Set system.adapter.${pkg.name}.0`);
-        objects.setObject(`system.adapter.${pkg.name}.0`, {
+        console.log(`Set system.adapter.${id}`);
+        objects.setObject(`system.adapter.${id}`, {
             common: {
                 enabled: false,
             },
@@ -903,6 +885,7 @@ function stopController(cb) {
             cb(true);
             cb = null;
         }
+        pids.controller = null;
     });
 
     timeout = setTimeout(() => {
@@ -915,7 +898,7 @@ function stopController(cb) {
             cb(false);
             cb = null;
         }
-        pids[`${pkg.name}.0`] = null;
+        pids.controller = null;
     }, 5000);
 }
 
