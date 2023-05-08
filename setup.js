@@ -294,7 +294,6 @@ async function installAdapter(customAdapterName, cb) {
         console.warn(`[${customAdapterName}] Adapter not installed: ${err}`);
         // try workaround
         installCustomAdapter(customAdapterName);
-        const startFile = `node_modules/${appName}.js-controller/${appName}.js`;
         // make first install
         if (debug) {
             cp.execSync(`node ${startFile} add ${customAdapterName} --enabled false`, {
