@@ -9,8 +9,14 @@ Legacy test modules for ioBroker
 3. Replace in `tests/testAdapter.js` the code `const setup  = require('./lib/setup');` with `const setup = require('@iobroker/legacy-testing');`
 4. Replace whole file `tests/testPackageFiles.js` with `require('@iobroker/legacy-testing/tests/testPackageFiles');`
 
+## Usage of the specific js-controller version 
+Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-464b0fd6`
+
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
+### **WORK IN PROGRESS**
+* (bluefox) Allowed using the specific version of js-controller
+
 ### 0.3.6 (2023-05-08)
 * (bluefox) Added possibility to install additional adapters at start
 * (bluefox) Added setOfflineState/getOfflineState

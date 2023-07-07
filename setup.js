@@ -394,7 +394,7 @@ async function installJsController(preInstalledAdapters, cb) {
             if (!fs.existsSync(`${rootDir}tmp/node_modules/${appName}.js-controller`)) {
                 console.log('installJsController: no js-controller => install dev build from npm');
 
-                cp.execSync(`npm install ${appName}.js-controller@dev --prefix ./ --production`, {
+                cp.execSync(`npm install ${appName}.js-controller@${process.env.JS_CONTROLLER_VERSION || 'dev'} --prefix ./ --production`, {
                     cwd: `${rootDir}tmp/`,
                     stdio: [0, 1, 2],
                 });
@@ -423,7 +423,7 @@ async function installJsController(preInstalledAdapters, cb) {
             if (fs.existsSync(`${rootDir}node_modules/${appName}.js-controller/${appName}.js`)) {
                 _pid = cp.fork(`${appName}.js`, ['stop'], {
                     cwd: `${rootDir}node_modules/${appName}.js-controller`,
-                    stdio: [0, 1, 2, 'ipc']
+                    stdio: [0, 1, 2, 'ipc'],
                 });
             }
 
