@@ -14,7 +14,7 @@ Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-46
 
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
-### **WORK IN PROGRESS**
+### 1.0.0 (2023-09-18)
 * (bluefox) Corrected error if systemConfig requested
 
 ### 0.3.7 (2023-07-07)
