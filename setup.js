@@ -543,6 +543,11 @@ function clearDB() {
 }
 
 function setupController(preInstalledAdapters, cb) {
+    if (typeof preInstalledAdapters === 'function') {
+        cb = preInstalledAdapters;
+        preInstalledAdapters = null;
+    }
+
     installJsController(preInstalledAdapters, async isInitialized => {
         try {
             clearControllerLog();
