@@ -59,11 +59,11 @@ describe('Test package.json and io-package.json', () => {
             console.log();
         }
 
-        if (
-            ioPackage.common.title.includes('iobroker') ||
+        if (ioPackage.common.title &&
+            (ioPackage.common.title.includes('iobroker') ||
             ioPackage.common.title.includes('ioBroker') ||
             ioPackage.common.title.includes('adapter') ||
-            ioPackage.common.title.includes('Adapter')
+            ioPackage.common.title.includes('Adapter'))
         ) {
             console.log('WARNING: title contains Adapter or ioBroker. It is clear anyway, that it is adapter for ioBroker.');
             console.log();
