@@ -4,6 +4,8 @@
   "main": "setup.js",
   "files": [
     "setup.js",
+    "engineHelper.js",
+    "guiHelper.js",
     "tests/"
   ],
   "description": "Module to test ioBroker adapters with legacy tests. For new tests please use @iobroker/testing",
