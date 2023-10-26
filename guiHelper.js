@@ -9,11 +9,14 @@ const puppeteer = require('puppeteer');
 const { blue, cyan, red, yellow } = require('colorette');
 const fs = require('fs');
 
-const rootDir = `${__dirname}/../`;
 let gBrowser;
 let gPage;
 
-async function startBrowser(adapterName, headless) {
+async function startBrowser(adapterName, rootDir, headless) {
+    if (!rootDir.endsWith('/')) {
+        rootDir += '/';
+    }
+
     const browser = await puppeteer.launch({
         headless: headless === undefined ? false : headless,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -61,7 +64,10 @@ async function stopBrowser(browser) {
     await browser.close();
 }
 
-async function screenshot(page, fileName) {
+async function screenshot(rootDir, page, fileName) {
+    if (!rootDir.endsWith('/')) {
+        rootDir += '/';
+    }
     page = page || gPage;
     await page.screenshot({ path: `${rootDir}tmp/screenshots/${fileName}.png` });
 }
