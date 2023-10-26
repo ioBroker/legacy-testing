@@ -14,7 +14,7 @@ Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-46
 
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
-### **WORK IN PROGRESS**
+### 1.0.3 (2023-10-26)
 * (bluefox) Added helper files to test react admin GUI
 
 ### 1.0.1 (2023-10-16)
