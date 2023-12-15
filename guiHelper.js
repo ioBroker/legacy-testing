@@ -12,6 +12,11 @@ const fs = require('fs');
 let gBrowser;
 let gPage;
 
+/* This function starts the browser and opens the desired adapter
+    * @param {string} adapterName - could be just an adapter name or adapter name with path, like 'device-manager/tab_m.html'
+    * @param {string} rootDir
+    * @param {boolean} headless
+ */
 async function startBrowser(adapterName, rootDir, headless) {
     if (!rootDir.endsWith('/')) {
         rootDir += '/';
@@ -50,7 +55,7 @@ async function startBrowser(adapterName, rootDir, headless) {
         })
         .on('pageerror', ({ message }) => console.log(red(`[BROWSER] ${message}`)));
 
-    await gPage.goto(`http://127.0.0.1:8081/adapter/${adapterName}/index_m.html?0&newReact=true&0&react=dark`, { waitUntil: 'domcontentloaded' });
+    await gPage.goto(`http://127.0.0.1:8081/adapter/${adapterName.includes('/') ? (!adapterName.includes('?') ? `${adapterName}?` : adapterName) : `${adapterName}/index_m.html?`}&newReact=true&0&react=dark`, { waitUntil: 'domcontentloaded' });
 
     // Create directory
     !fs.existsSync(`${rootDir}tmp/screenshots`) && fs.mkdirSync(`${rootDir}tmp/screenshots`);
