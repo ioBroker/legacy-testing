@@ -14,6 +14,9 @@ Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-46
 
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
+### **WORK IN PROGRESS**
+* (bluefox) Added support for vis-1 testing
+
 ### 1.0.4 (2023-12-15)
 * (bluefox) Allowed GUI tests for tab_m.html too
 

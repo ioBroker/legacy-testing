@@ -3,18 +3,24 @@
 /* jslint node: true */
 
 // check if tmp directory exists
-const fs            = require('fs');
-const path          = require('path');
-const cp            = require('child_process');
-const rootDir       = path.normalize(`${__dirname}/../../../`);
-const pkg           = require(`${rootDir}package.json`);
-const debug         = typeof v8debug === 'object';
-pkg.main = pkg.main || 'main.js';
+const fs    = require('fs');
+const path  = require('path');
+const cp    = require('child_process');
+let rootDir = path.normalize(`${__dirname}/../../../`);
+const debug = typeof v8debug === 'object';
 
 let JSONLDB;
 
 let adapterName = path.normalize(rootDir).replace(/\\/g, '/').split('/');
+if (adapterName[adapterName.length - 2] === 'vis-2-widgets-testing') {
+    rootDir = path.normalize(`${__dirname}/../../../../../../`);
+    adapterName = path.normalize(rootDir).replace(/\\/g, '/').split('/');
+}
 adapterName = adapterName[adapterName.length - 2];
+
+let pkg = require(`${rootDir}package.json`);
+pkg.main = pkg.main || 'main.js';
+
 const adaptersStarted = {};
 const pids = {};
 
