@@ -35,6 +35,8 @@ initialize();
 function initialize() {
     pkg = require(`${rootDir}package.json`);
     pkg.main = pkg.main || 'main.js';
+
+    !fs.existsSync(`${rootDir}tmp`) && fs.mkdirSync(`${rootDir}tmp`);
 }
 
 /** Lowercase application name */
@@ -105,8 +107,6 @@ function copyFolderRecursiveSync(source, target, ignore) {
         });
     }
 }
-
-!fs.existsSync(`${rootDir}tmp`) && fs.mkdirSync(`${rootDir}tmp`);
 
 async function storeOriginalFiles() {
     console.log('Store original files...');
