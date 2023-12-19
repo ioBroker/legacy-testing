@@ -548,6 +548,25 @@ function clearDB() {
     }
 }
 
+/** @typedef {{ rootDir?: string }} LegacyTestingOptions */
+
+/**
+ * Override options
+ *
+ * @param {LegacyTestingOptions} options specify attributes which should be overridden
+ */
+function setOptions(options) {
+    if (options.rootDir) {
+        rootDir = options.rootDir
+    }
+}
+
+/**
+ * Install js-controller and setup the adapter
+ *
+ * @param {string[]} preInstalledAdapters list of adapters which need to be installed additionally
+ * @param {(systemConfig: Record<string, any>) => void} cb callback
+ */
 function setupController(preInstalledAdapters, cb) {
     if (typeof preInstalledAdapters === 'function') {
         cb = preInstalledAdapters;
@@ -960,4 +979,5 @@ if (typeof module !== undefined && module.parent) {
     module.exports.installCustomAdapter = installCustomAdapter;
     module.exports.getObject = getObject;
     module.exports.setObject = setObject;
+    module.exports.setOptions = setOptions;
 }
