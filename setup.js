@@ -37,13 +37,8 @@ function initialize() {
     pkg.main = pkg.main || 'main.js';
 }
 
-function getAppName() {
-    const parts = rootDir.replace(/\\/g, '/').split('/');
-    parts.pop();
-    return parts.pop().split('.')[0];
-}
-
-const appName = getAppName().toLowerCase();
+/** Lowercase application name */
+const appName = 'iobroker';
 
 function loadJSONLDB() {
     if (!JSONLDB) {
