@@ -18,8 +18,7 @@ if (adapterName[adapterName.length - 2] === 'vis-2-widgets-testing') {
 }
 adapterName = adapterName[adapterName.length - 2];
 
-let pkg = require(`${rootDir}package.json`);
-pkg.main = pkg.main || 'main.js';
+let pkg;
 
 const adaptersStarted = {};
 const pids = {};
@@ -27,6 +26,16 @@ const pids = {};
 let objects;
 let states;
 let systemConfig = null;
+
+initialize();
+
+/**
+ * Initialize logic, you can re-trigger it after config has changed
+ */
+function initialize() {
+    pkg = require(`${rootDir}package.json`);
+    pkg.main = pkg.main || 'main.js';
+}
 
 function getAppName() {
     const parts = rootDir.replace(/\\/g, '/').split('/');
@@ -400,7 +409,7 @@ async function installJsController(preInstalledAdapters, cb) {
             if (!fs.existsSync(`${rootDir}tmp/node_modules/${appName}.js-controller`)) {
                 console.log('installJsController: no js-controller => install dev build from npm');
 
-                cp.execSync(`npm install ${appName}.js-controller@${process.env.JS_CONTROLLER_VERSION || 'dev'} --prefix ./ --production`, {
+                cp.execSync(`npm install ${appName}.js-controller@${process.env.JS_CONTROLLER_VERSION || 'dev'} --prefix ./ --omit=dev`, {
                     cwd: `${rootDir}tmp/`,
                     stdio: [0, 1, 2],
                 });
@@ -473,7 +482,7 @@ function copyAdapterToController() {
         stdio: [0, 1, 2],
     });
     copyFileSync(`${rootDir}${pkg.name}-${pkg.version}.tgz`, `${rootDir}tmp/${pkg.name}-${pkg.version}.tgz`);
-    cp.execSync(`npm install ${pkg.name}-${pkg.version}.tgz --prefix ./ --production`, {
+    cp.execSync(`npm install ${pkg.name}-${pkg.version}.tgz --prefix ./ --omit=dev`, {
         cwd:   `${rootDir}tmp`,
         stdio: [0, 1, 2],
     });
@@ -483,7 +492,7 @@ function copyAdapterToController() {
 function installCustomAdapter(adapterName) {
     if (!fs.existsSync(`${rootDir}tmp/node_modules/${adapterName}`)) {
         console.log(`Install ${adapterName}`);
-        cp.execSync(`npm install ${adapterName} --prefix ./ --production`, {
+        cp.execSync(`npm install ${adapterName} --prefix ./ --omit=dev`, {
             cwd:   `${rootDir}tmp/`,
             stdio: [0, 1, 2],
         });
@@ -980,4 +989,5 @@ if (typeof module !== undefined && module.parent) {
     module.exports.getObject = getObject;
     module.exports.setObject = setObject;
     module.exports.setOptions = setOptions;
+    module.exports.initialize = initialize;
 }
