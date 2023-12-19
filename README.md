@@ -14,7 +14,7 @@ Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-46
 
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
-### **WORK IN PROGRESS**
+### 1.0.7 (2023-12-19)
 * (foxriver76) allow re-initialization after config change
 
 ### 1.0.6 (2023-12-19)
