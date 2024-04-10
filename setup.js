@@ -459,6 +459,22 @@ async function installJsController(preInstalledAdapters, cb) {
         await storeOriginalFiles();
         cb && cb(true);
     } else {
+        if (preInstalledAdapters) {
+            for (let p = 0; p < preInstalledAdapters.length; p++) {
+                // if not installed
+                const parts = preInstalledAdapters[p].split('@');
+                const name = parts[0];
+                const version = parts[1];
+                if (!fs.existsSync(`${rootDir}tmp/node_modules/${name}`)) {
+                    await installAdapterAsync(preInstalledAdapters[p]);
+                } else {
+                    const pack = require(`${rootDir}tmp/node_modules/${name}/package.json`);
+                    if (pack.version !== version) {
+                        await installAdapterAsync(preInstalledAdapters[p]);
+                    }
+                }
+            }
+        }
         setTimeout(() => {
             console.log('installJsController: js-controller installed');
             cb && cb(false);
@@ -560,8 +576,9 @@ function clearDB() {
  * @param {LegacyTestingOptions} options specify attributes which should be overridden
  */
 function setOptions(options) {
-    if (options.rootDir) {
+    if (options.rootDir && fs.existsSync(options.rootDir) && rootDir !== options.rootDir) {
         rootDir = options.rootDir
+        initialize();
     }
 }
 
