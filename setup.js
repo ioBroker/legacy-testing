@@ -711,6 +711,27 @@ function startCustomAdapter(adapterName, adapterInstance) {
                     stdio: [0, 1, 2, 'ipc'],
                 });
             }
+            pids[id].on('exit', (code, signal) => {
+                if (pids[id]) {
+                    console.log(`child process terminated 1 due to receipt of signal ${signal}`);
+                    let resolve = pids[id].customResolve;
+                    if (resolve) {
+                        delete pids[id].customResolve;
+                    }
+                    pids[id] = null;
+                    resolve && resolve();
+                }
+            });
+            pids[id].on('close', () => {
+                if (pids[id]) {
+                    let resolve = pids[id].customResolve;
+                    if (resolve) {
+                        delete pids[id].customResolve;
+                    }
+                    pids[id] = null;
+                    resolve && resolve();
+                }
+            });
         } catch (error) {
             console.error(JSON.stringify(error));
         }
@@ -853,16 +874,19 @@ function stopCustomAdapter(adapterName, adapterInstance) {
     } else {
         adaptersStarted[id] = false;
         return new Promise(resolve => {
+            pids[id].customResolve = resolve;
             pids[id].on('exit', (code, signal) => {
                 if (pids[id]) {
-                    console.log(`child process terminated due to receipt of signal ${signal}`);
+                    console.log(`child process terminated 3 due to receipt of signal ${signal}`);
+                    delete pids[id].customResolve;
                     pids[id] = null;
                     resolve();
                 }
             });
 
-            pids[id].on('close', (/* code, signal */) => {
+            pids[id].on('close', () => {
                 if (pids[id]) {
+                    delete pids[id].customResolve;
                     pids[id] = null;
                     resolve();
                 }
