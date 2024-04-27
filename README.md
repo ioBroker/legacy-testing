@@ -14,6 +14,9 @@ Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-46
 
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
+### **WORK IN PROGRESS**
+* (bluefox) Allowed setting license into common.licenseInformation.license
+
 ### 1.0.11 (2024-04-14)
 * (bluefox) Added support for the once mode
 
