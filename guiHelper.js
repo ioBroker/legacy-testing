@@ -1,5 +1,5 @@
 /* This file helps to start and stop the browser and make screenshots of desired adapter
- * Do not forget to include into package.json:
+ * Do not forget to include in package.json:
  * "devDependencies": {
  *    "puppeteer": "^21.4.1",
  *    "colorette": "^1.2.1"
@@ -7,7 +7,7 @@
 **/
 const puppeteer = require('puppeteer');
 const { blue, cyan, red, yellow } = require('colorette');
-const fs = require('fs');
+const fs = require('node:fs');
 
 let gBrowser;
 let gPage;
@@ -16,15 +16,16 @@ let gPage;
     * @param {string} adapterName - could be just an adapter name or adapter name with path, like 'device-manager/tab_m.html'
     * @param {string} rootDir
     * @param {boolean} headless
+    * @param {pathUrl} string
  */
-async function startBrowser(adapterName, rootDir, headless) {
+async function startBrowser(adapterName, rootDir, headless, pathUrl) {
     if (!rootDir.endsWith('/')) {
         rootDir += '/';
     }
 
     const browser = await puppeteer.launch({
         headless: headless === undefined ? false : headless,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
     const pages = await browser.pages();
     const timeout = 5000;
@@ -33,7 +34,7 @@ async function startBrowser(adapterName, rootDir, headless) {
     await pages[0].setViewport( {
         width: 1920,
         height: 1080,
-        deviceScaleFactor: 1
+        deviceScaleFactor: 1,
     });
 
     gBrowser = browser;
@@ -47,7 +48,7 @@ async function startBrowser(adapterName, rootDir, headless) {
                 LOG: text => text,
                 ERR: red,
                 WAR: yellow,
-                INF: cyan
+                INF: cyan,
             };
 
             const color = colors[type] || blue;
@@ -55,7 +56,12 @@ async function startBrowser(adapterName, rootDir, headless) {
         })
         .on('pageerror', ({ message }) => console.log(red(`[BROWSER] ${message}`)));
 
-    await gPage.goto(`http://127.0.0.1:8081/adapter/${adapterName.includes('/') ? (!adapterName.includes('?') ? `${adapterName}?` : adapterName) : `${adapterName}/index_m.html?`}&newReact=true&0&react=dark`, { waitUntil: 'domcontentloaded' });
+    pathUrl = pathUrl || `/adapter/${adapterName.includes('/') ? (!adapterName.includes('?') ? `${adapterName}?` : adapterName) : `${adapterName}/index_m.html?`}&newReact=true&0&react=dark`;
+    if (!pathUrl.startsWith('/')) {
+        pathUrl = `/${pathUrl}`;
+    }
+
+    await gPage.goto(`http://127.0.0.1:8081${pathUrl}`, { waitUntil: 'domcontentloaded' });
 
     // Create directory
     !fs.existsSync(`${rootDir}tmp/screenshots`) && fs.mkdirSync(`${rootDir}tmp/screenshots`);
@@ -80,5 +86,5 @@ async function screenshot(rootDir, page, fileName) {
 module.exports = {
     startBrowser,
     stopBrowser,
-    screenshot
+    screenshot,
 };
