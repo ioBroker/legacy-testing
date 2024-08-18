@@ -14,7 +14,7 @@ Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-46
 
 ## Changelog
 <!-- ### **WORK IN PROGRESS** -->
-### **WORK IN PROGRESS**
+### 1.0.13 (2024-08-18)
 * (bluefox) Improve the GUI tests
 
 ### 1.0.12 (2024-04-27)
