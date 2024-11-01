@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "mocha": "^10.7.3",
-    "chai": "^4.5.0"
+    "chai": "^5.1.2"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^3.8.0",
