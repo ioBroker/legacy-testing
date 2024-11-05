@@ -18,8 +18,7 @@ Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-46
 ## Changelog
 
 <!-- ### **WORK IN PROGRESS** -->
-
-### **WORK IN PROGRESS**
+### 2.0.0 (2024-11-05)
 
 -   (bluefox) Function names for GUI tests were changed: startIoBrokerAdmin => startIoBrokerAdapters, stopIoBrokerAdmin => stopIoBrokerAdapters
 
