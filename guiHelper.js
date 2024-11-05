@@ -4,19 +4,19 @@
  *    "puppeteer": "^21.4.1",
  *    "colorette": "^1.2.1"
  * }
-**/
+ **/
 const puppeteer = require('puppeteer');
 const { blue, cyan, red, yellow } = require('colorette');
-const fs = require('node:fs');
+const { existsSync, mkdirSync } = require('node:fs');
 
 let gBrowser;
 let gPage;
 
 /* This function starts the browser and opens the desired adapter
-    * @param {string} adapterName - could be just an adapter name or adapter name with path, like 'device-manager/tab_m.html'
-    * @param {string} rootDir
-    * @param {boolean} headless
-    * @param {pathUrl} string
+ * @param {string} adapterName - could be just an adapter name or adapter name with path, like 'device-manager/tab_m.html'
+ * @param {string} rootDir
+ * @param {boolean} headless
+ * @param {pathUrl} string
  */
 async function startBrowser(adapterName, rootDir, headless, pathUrl) {
     if (!rootDir.endsWith('/')) {
@@ -31,7 +31,7 @@ async function startBrowser(adapterName, rootDir, headless, pathUrl) {
     const timeout = 5000;
     pages[0].setDefaultTimeout(timeout);
 
-    await pages[0].setViewport( {
+    await pages[0].setViewport({
         width: 1920,
         height: 1080,
         deviceScaleFactor: 1,
@@ -56,7 +56,9 @@ async function startBrowser(adapterName, rootDir, headless, pathUrl) {
         })
         .on('pageerror', ({ message }) => console.log(red(`[BROWSER] ${message}`)));
 
-    pathUrl = pathUrl || `/adapter/${adapterName.includes('/') ? (!adapterName.includes('?') ? `${adapterName}?` : adapterName) : `${adapterName}/index_m.html?`}&newReact=true&0&react=dark`;
+    pathUrl =
+        pathUrl ||
+        `/adapter/${adapterName.includes('/') ? (!adapterName.includes('?') ? `${adapterName}?` : adapterName) : `${adapterName}/index_m.html?`}&newReact=true&0&react=dark`;
     if (!pathUrl.startsWith('/')) {
         pathUrl = `/${pathUrl}`;
     }
@@ -64,7 +66,7 @@ async function startBrowser(adapterName, rootDir, headless, pathUrl) {
     await gPage.goto(`http://127.0.0.1:8081${pathUrl}`, { waitUntil: 'domcontentloaded' });
 
     // Create directory
-    !fs.existsSync(`${rootDir}tmp/screenshots`) && fs.mkdirSync(`${rootDir}tmp/screenshots`);
+    !existsSync(`${rootDir}tmp/screenshots`) && mkdirSync(`${rootDir}tmp/screenshots`);
     await gPage.screenshot({ path: `${rootDir}tmp/screenshots/00_starting.png` });
 
     return { browser, page: pages[0] };

@@ -4,10 +4,10 @@
 /* jshint expr: true*/
 'use strict';
 const expect = require('chai').expect;
-const setup  = require('@iobroker/legacy-tests').setup;
+const setup = require('@iobroker/legacy-tests').setup;
 
 let objects = null;
-let states  = null;
+let states = null;
 let onStateChanged = null;
 
 let adapterShortName = setup.adapterName.substring(setup.adapterName.indexOf('.') + 1);
@@ -40,12 +40,10 @@ function checkValueOfState(id, value, cb, counter) {
         err && console.error(err);
         if (value === null && !state) {
             cb && cb();
-        } else
-        if (state && (value === undefined || state.val === value)) {
+        } else if (state && (value === undefined || state.val === value)) {
             cb && cb();
         } else {
-            setTimeout(() =>
-                checkValueOfState(id, value, cb, counter + 1), 500);
+            setTimeout(() => checkValueOfState(id, value, cb, counter + 1), 500);
         }
     });
 }
@@ -57,15 +55,15 @@ describe(`Test ${adapterShortName} adapter`, function () {
         setup.setupController(async () => {
             let config = await setup.getAdapterConfig();
             // enable adapter
-            config.common.enabled  = true;
+            config.common.enabled = true;
             config.common.loglevel = 'debug';
 
-            config.native.port   = 15000;
+            config.native.port = 15000;
             config.native.devices = [
                 {
                     ip: '127.0.0.1',
-                    protocol: 'HOME'
-                }
+                    protocol: 'HOME',
+                },
             ];
             await setup.setAdapterConfig(config.common, config.native);
 
@@ -75,7 +73,7 @@ describe(`Test ${adapterShortName} adapter`, function () {
                 (id, state) => onStateChanged && onStateChanged(id, state),
                 (_objects, _states) => {
                     objects = _objects;
-                    states  = _states;
+                    states = _states;
                     _done();
                 },
             );

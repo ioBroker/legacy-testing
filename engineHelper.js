@@ -1,34 +1,54 @@
 /**
  * This file starts and stops the admin adapter including js-controller
  */
-const fs = require('fs');
-const setup = require('./setup');
+const { existsSync, readdirSync, statSync, rmdirSync, unlinkSync } = require('node:fs');
+const {
+    setOfflineState,
+    setupController,
+    setObject,
+    getAdapterConfig,
+    setAdapterConfig,
+    startController,
+    startCustomAdapter,
+    stopCustomAdapter,
+    stopController,
+} = require('./setup');
 
 let rootDir = `${__dirname}/../../../`;
 let objects = null;
-let states  = null;
+let states = null;
 let onStateChanged = null;
 
 function deleteFoldersRecursive(path) {
     if (path.endsWith('/')) {
         path = path.substring(0, path.length - 1);
     }
-    if (fs.existsSync(path)) {
-        const files = fs.readdirSync(path);
+    if (existsSync(path)) {
+        const files = readdirSync(path);
         for (const file of files) {
             const curPath = `${path}/${file}`;
-            const stat = fs.statSync(curPath);
+            const stat = statSync(curPath);
             if (stat.isDirectory()) {
                 deleteFoldersRecursive(curPath);
-                fs.rmdirSync(curPath);
+                rmdirSync(curPath);
             } else {
-                fs.unlinkSync(curPath);
+                unlinkSync(curPath);
             }
         }
     }
 }
 
-function startIoBrokerAdmin(options) {
+let startedAdapters = ['admin'];
+
+/**
+ * Start ioBroker controller and provided adapters. If no adapters are provided, only the admin will be started.
+ *
+ * @param options.rootDir {string} The root directory of the project
+ * @param options.adapters {string[]} The adapters to start. Default is ['admin']
+ *
+ * @return {Promise<unknown>}
+ */
+function startIoBrokerAdapters(options) {
     options = options || {};
     if (options.rootDir) {
         rootDir = options.rootDir;
@@ -38,70 +58,84 @@ function startIoBrokerAdmin(options) {
         // delete the old project
         deleteFoldersRecursive(`${rootDir}tmp/screenshots`);
 
-        await setup.setOfflineState(`system.adapter.admin.0.alive`, { val: false });
+        const adapters = options.adapters || startedAdapters;
+        startedAdapters = adapters;
+        for (let a = 0; a < adapters.length; a++) {
+            await setOfflineState(`system.adapter.${adapters[a]}.0.alive`, { val: false });
+        }
 
-        setup.setupController(['admin'], async systemConfig => {
+        setupController(adapters, async systemConfig => {
             // disable statistics and set license accepted
             systemConfig.common.licenseConfirmed = true;
             systemConfig.common.diag = 'none';
-            await setup.setObject('system.config', systemConfig);
+            await setObject('system.config', systemConfig);
 
-            // start admin
-            const adminConfig = await setup.getAdapterConfig(0, 'admin');
-            if (adminConfig && adminConfig.common) {
-                adminConfig.common.enabled = true;
-                await setup.setAdapterConfig(adminConfig.common, adminConfig.native, 0, 'admin');
+            // start adapters
+            for (let a = 0; a < adapters.length; a++) {
+                const adapter = adapters[a];
+                const adapterConfig = await getAdapterConfig(0, adapter);
+                if (adapterConfig?.common) {
+                    adapterConfig.common.enabled = true;
+                    await setAdapterConfig(adapterConfig.common, adapterConfig.native, 0, adapter);
+                }
             }
 
-            setup.startController(
+            startController(
                 false, // do not start widgets
                 (/* id, obj */) => {},
                 (id, state) => onStateChanged && onStateChanged(id, state),
                 async (_objects, _states) => {
                     objects = _objects;
                     states = _states;
-                    setup.startCustomAdapter('admin', 0);
-                    await checkIsWelcomeStartedAsync('admin', states);
+                    for (let a = 0; a < adapters.length; a++) {
+                        startCustomAdapter(adapters[a], 0);
+                        await checkIsAdapterStartedAsync(adapters[a], states);
+                    }
                     resolve({ objects, states });
-                });
+                },
+            );
         });
     });
 }
 
-async function stopIoBrokerAdmin() {
-    await setup.stopCustomAdapter('admin', 0);
+async function stopIoBrokerAdapters() {
+    for (let a = 0; a < startedAdapters.length; a++) {
+        await stopCustomAdapter(startedAdapters[a], 0);
+    }
 
     await new Promise(resolve =>
-        setup.stopController(normalTerminated => {
+        stopController(normalTerminated => {
             console.log(`Adapter normal terminated: ${normalTerminated}`);
             resolve();
-        }));
+        }),
+    );
 }
 
-function checkIsWelcomeStarted(adapterName, states, cb, counter) {
+function checkIsAdapterStarted(adapterName, states, cb, counter) {
     counter = counter === undefined ? 20 : counter;
     if (counter === 0) {
         return cb && cb(`Cannot check value Of State system.adapter.${adapterName}.0.alive`);
     }
 
     states.getState(`system.adapter.${adapterName}.0.alive`, (err, state) => {
-        console.log(`[${counter}]Check if ${adapterName} is started "system.adapter.${adapterName}.0.alive" = ${JSON.stringify(state)}`);
+        console.log(
+            `[${counter}]Check if ${adapterName} is started "system.adapter.${adapterName}.0.alive" = ${JSON.stringify(state)}`,
+        );
         err && console.error(err);
         if (state && state.val) {
             cb && cb();
         } else {
-            setTimeout(() =>
-                checkIsWelcomeStarted(adapterName, states, cb, counter - 1), 500);
+            setTimeout(() => checkIsAdapterStarted(adapterName, states, cb, counter - 1), 500);
         }
     });
 }
 
-function checkIsWelcomeStartedAsync(adapterName, states, counter) {
-    return new Promise(resolve => checkIsWelcomeStarted(adapterName, states, resolve, counter));
+function checkIsAdapterStartedAsync(adapterName, states, counter) {
+    return new Promise(resolve => checkIsAdapterStarted(adapterName, states, resolve, counter));
 }
 
 module.exports = {
-    startIoBrokerAdmin,
-    stopIoBrokerAdmin,
-    setOnStateChanged: cb => onStateChanged = cb
+    startIoBrokerAdapters,
+    stopIoBrokerAdapters,
+    setOnStateChanged: cb => (onStateChanged = cb),
 };

@@ -1,78 +1,107 @@
 # legacy-tests
+
 Legacy test modules for ioBroker
 
-**This is a legacy repository. Please use the new test framework `@iobroker/testing` for new adapters** 
+**This is a legacy repository. Please use the new test framework `@iobroker/testing` for new adapters**
 
 ## How to replace existing tests
-1. add to package.json=>devDependencies: `"@iobroker/legacy-testing": "^0.0.4"`
+
+1. add to package.json=>devDependencies: `"@iobroker/legacy-testing": "^2.0.0"`
 2. Remove from package.json=>devDependencies: `chai`
 3. Replace in `tests/testAdapter.js` the code `const setup  = require('./lib/setup');` with `const setup = require('@iobroker/legacy-testing');`
 4. Replace whole file `tests/testPackageFiles.js` with `require('@iobroker/legacy-testing/tests/testPackageFiles');`
 
-## Usage of the specific js-controller version 
+## Usage of the specific js-controller version
+
 Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-464b0fd6`
 
 ## Changelog
+
 <!-- ### **WORK IN PROGRESS** -->
+
+### **WORK IN PROGRESS**
+
+-   (bluefox) Function names for GUI tests were changed: startIoBrokerAdmin => startIoBrokerAdapters, stopIoBrokerAdmin => stopIoBrokerAdapters
+
 ### 1.0.13 (2024-08-18)
-* (bluefox) Improved the GUI tests
+
+-   (bluefox) Improved the GUI tests
 
 ### 1.0.12 (2024-04-27)
-* (bluefox) Allowed setting license into `common.licenseInformation.license`
+
+-   (bluefox) Allowed setting license into `common.licenseInformation.license`
 
 ### 1.0.11 (2024-04-14)
-* (bluefox) Added support for the once mode
+
+-   (bluefox) Added support for the once mode
 
 ### 1.0.10 (2024-04-10)
-* (bluefox) Added support for vis-2 testing
+
+-   (bluefox) Added support for vis-2 testing
 
 ### 1.0.9 (2023-12-19)
-* (foxriver76) create folder on initialization
+
+-   (foxriver76) create folder on initialization
 
 ### 1.0.8 (2023-12-19)
-* (foxriver76) use hardcoded appName instead of inference with a heuristic approach
+
+-   (foxriver76) use hardcoded appName instead of inference with a heuristic approach
 
 ### 1.0.7 (2023-12-19)
-* (foxriver76) allow re-initialization after config change
+
+-   (foxriver76) allow re-initialization after config change
 
 ### 1.0.6 (2023-12-19)
-* (foxriver76) allow specifying the `rootDir`
+
+-   (foxriver76) allow specifying the `rootDir`
 
 ### 1.0.5 (2023-12-15)
-* (bluefox) Added support for vis-1 testing
+
+-   (bluefox) Added support for vis-1 testing
 
 ### 1.0.4 (2023-12-15)
-* (bluefox) Allowed GUI tests for tab_m.html too
+
+-   (bluefox) Allowed GUI tests for tab_m.html too
 
 ### 1.0.3 (2023-10-26)
-* (bluefox) Added helper files to test react admin GUI
+
+-   (bluefox) Added helper files to test react admin GUI
 
 ### 1.0.1 (2023-10-16)
-* (bluefox) Made `common.title` not required
+
+-   (bluefox) Made `common.title` not required
 
 ### 1.0.0 (2023-09-18)
-* (bluefox) Corrected error if systemConfig requested
+
+-   (bluefox) Corrected error if systemConfig requested
 
 ### 0.3.7 (2023-07-07)
-* (bluefox) Allowed using the specific version of js-controller
+
+-   (bluefox) Allowed using the specific version of js-controller
 
 ### 0.3.6 (2023-05-08)
-* (bluefox) Added possibility to install additional adapters at start
-* (bluefox) Added setOfflineState/getOfflineState
+
+-   (bluefox) Added possibility to install additional adapters at start
+-   (bluefox) Added setOfflineState/getOfflineState
 
 ### 0.1.1 (2022-12-22)
-* (bluefox) Extended testPackageFiles.js with checks
+
+-   (bluefox) Extended testPackageFiles.js with checks
 
 ### 0.1.0 (2022-12-22)
-* (bluefox) Corrected testPackageFiles.js
+
+-   (bluefox) Corrected testPackageFiles.js
 
 ### 0.0.4 (2022-11-21)
-* (bluefox) Added testPackageFiles.js
+
+-   (bluefox) Added testPackageFiles.js
 
 ### 0.0.3 (2022-11-21)
-* (bluefox) initial release
+
+-   (bluefox) initial release
 
 ## License
+
 MIT License
 
 Copyright (c) 2022-2024 bluefox <dogafox@gmail.com>
