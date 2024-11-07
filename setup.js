@@ -516,6 +516,14 @@ function copyAdapterToController() {
         stdio: [0, 1, 2],
     });
     console.log('Adapter copied.');
+
+    // update admin files
+    execSync(`node ${rootDir}tmp/node_modules/${appName}.js-controller/iobroker.js upload ${pkg.name.replace('iobroker.', '')}`, {
+        cwd: `${rootDir}tmp`,
+        stdio: [0, 1, 2],
+    });
+
+    console.log('Adapter uploaded.');
 }
 
 function installCustomAdapter(adapterName) {

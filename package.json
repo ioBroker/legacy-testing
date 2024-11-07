@@ -1,44 +1,44 @@
 {
-  "version": "2.0.0",
-  "name": "@iobroker/legacy-testing",
-  "main": "setup.js",
-  "files": [
-    "setup.js",
-    "engineHelper.js",
-    "guiHelper.js",
-    "tests/"
-  ],
-  "description": "Module to test ioBroker adapters with legacy tests. For new tests please use @iobroker/testing",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ioBroker/legacy-testing.git"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/ioBroker/legacy-testing/issues"
-  },
-  "homepage": "https://github.com/ioBroker/legacy-testing#readme",
-  "author": {
-    "name": "bluefox",
-    "email": "dogafox@gmail.com"
-  },
-  "dependencies": {
-    "mocha": "^10.8.2",
-    "chai": "^4.5.0"
-  },
-  "devDependencies": {
-    "@alcalzone/release-script": "^3.8.0",
-    "@alcalzone/release-script-plugin-license": "^3.7.0",
-    "@iobroker/eslint-config": "^0.1.6"
-  },
-  "scripts": {
-    "release": "release-script",
-    "release-patch": "release-script patch --yes",
-    "release-minor": "release-script minor --yes",
-    "release-major": "release-script major --yes",
-    "update-packages": "ncu --upgrade"
-  }
+    "version": "2.0.0",
+    "name": "@iobroker/legacy-testing",
+    "main": "setup.js",
+    "files": [
+        "setup.js",
+        "engineHelper.js",
+        "guiHelper.js",
+        "tests/"
+    ],
+    "description": "Module to test ioBroker adapters with legacy tests. For new tests please use @iobroker/testing",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ioBroker/legacy-testing.git"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/ioBroker/legacy-testing/issues"
+    },
+    "homepage": "https://github.com/ioBroker/legacy-testing#readme",
+    "author": {
+        "name": "bluefox",
+        "email": "dogafox@gmail.com"
+    },
+    "dependencies": {
+        "mocha": "^10.8.2",
+        "chai": "^4.5.0"
+    },
+    "devDependencies": {
+        "@alcalzone/release-script": "^3.8.0",
+        "@alcalzone/release-script-plugin-license": "^3.7.0",
+        "@iobroker/eslint-config": "^0.1.6"
+    },
+    "scripts": {
+        "release": "release-script",
+        "release-patch": "release-script patch --yes",
+        "release-minor": "release-script minor --yes",
+        "release-major": "release-script major --yes",
+        "update-packages": "ncu --upgrade"
+    }
 }
