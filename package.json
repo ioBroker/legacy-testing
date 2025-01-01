@@ -26,7 +26,7 @@
     "email": "dogafox@gmail.com"
   },
   "dependencies": {
-    "mocha": "^10.8.2",
+    "mocha": "^11.0.1",
     "chai": "^4.5.0"
   },
   "devDependencies": {
