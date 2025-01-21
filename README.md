@@ -18,7 +18,7 @@ Set `process.env.JS_CONTROLLER_VERSION` to version e.g. `5.0.5-alpha.0-20230617-
 ## Changelog
 
 <!-- ### **WORK IN PROGRESS** -->
-### **WORK IN PROGRESS**
+### 2.0.2 (2025-01-21)
 -   (@GermanBluefox) Packages were updated
 
 ### 2.0.1 (2024-11-07)
