@@ -13,11 +13,14 @@ Legacy test modules for ioBroker
 
 ## Usage of the specific js-controller version
 
-Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-464b0fd6`
+Set `process.env.JS_CONTROLLER_VERSION` to version e.g. `5.0.5-alpha.0-20230617-464b0fd6`
 
 ## Changelog
 
 <!-- ### **WORK IN PROGRESS** -->
+### **WORK IN PROGRESS**
+-   (@GermanBluefox) Packages were updated
+
 ### 2.0.1 (2024-11-07)
 -   (bluefox) Added the step to upload of the admin files after installation
 
@@ -106,7 +109,7 @@ Set process.env.JS_CONTROLLER_VERSION to version e.g. `5.0.5-alpha.0-20230617-46
 
 MIT License
 
-Copyright (c) 2022-2024 bluefox <dogafox@gmail.com>
+Copyright (c) 2022-2025 bluefox <dogafox@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
