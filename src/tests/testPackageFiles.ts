@@ -1,11 +1,5 @@
-/* jshint -W097 */
-/* jshint strict:false */
-/* jslint node: true */
-/* jshint expr: true */
-'use strict';
-
-const expect = require('chai').expect;
-const { readFileSync, existsSync } = require('node:fs');
+import { expect } from 'chai';
+import { readFileSync, existsSync } from 'node:fs';
 
 // node_modules/@iobroker/legacy-testing/tests/testPackageFiles.js
 const adapterDir = process.env.IOBROKER_ROOT_DIR || `${__dirname}/../../../../`;
@@ -81,11 +75,10 @@ describe('Test package.json and io-package.json', () => {
         }
 
         if (
-            ioPackage.common.title &&
-            (ioPackage.common.title.includes('iobroker') ||
-                ioPackage.common.title.includes('ioBroker') ||
-                ioPackage.common.title.includes('adapter') ||
-                ioPackage.common.title.includes('Adapter'))
+            ioPackage.common.title?.includes('iobroker') ||
+            ioPackage.common.title?.includes('ioBroker') ||
+            ioPackage.common.title?.includes('adapter') ||
+            ioPackage.common.title?.includes('Adapter')
         ) {
             console.log(
                 'WARNING: title contains Adapter or ioBroker. It is clear anyway, that it is adapter for ioBroker.',
@@ -94,33 +87,27 @@ describe('Test package.json and io-package.json', () => {
         }
 
         if (!ioPackage.common.controller && !ioPackage.common.onlyWWW && !ioPackage.common.noConfig) {
-            if (
-                ioPackage.common.materialize ||
-                (ioPackage.common.adminUI && ioPackage.common.adminUI.conifg === 'materialize')
-            ) {
+            if (ioPackage.common.materialize || ioPackage.common.adminUI?.conifg === 'materialize') {
                 expect(
                     existsSync(`${adapterDir}/admin/index_m.html`),
                     'Admin3 support is enabled in io-package.json, but index_m.html is missing!',
                 ).to.be.true;
             }
-            if (
-                ioPackage.common.jsonConfig ||
-                (ioPackage.common.adminUI && ioPackage.common.adminUI.conifg === 'json')
-            ) {
+            if (ioPackage.common.jsonConfig || ioPackage.common.adminUI?.conifg === 'json') {
                 expect(
                     existsSync(`${adapterDir}/admin/jsonConfig.json`) ||
                         existsSync(`${adapterDir}/admin/jsonConfig.json5`),
                     'Admin3 support is enabled in io-package.json, but jsonConfig.json(5) is missing!',
                 ).to.be.true;
             }
-            if (ioPackage.common.adminUI && ioPackage.common.adminUI.custom === 'json') {
+            if (ioPackage.common.adminUI?.custom === 'json') {
                 expect(
                     existsSync(`${adapterDir}/admin/jsonCustom.json`) ||
                         existsSync(`${adapterDir}/admin/jsonCustom.json5`),
                     'Custom config support is enabled in io-package.json, but jsonCustom.json(5) is missing!',
                 ).to.be.true;
             }
-            if (ioPackage.common.adminUI && ioPackage.common.adminUI.tab === 'html') {
+            if (ioPackage.common.adminUI?.tab === 'html') {
                 expect(
                     existsSync(`${adapterDir}/admin/tab.html`) || existsSync(`${adapterDir}/admin/tab_m.html`),
                     'HTML-Tab support is enabled in io-package.json, but tab(_m).html is missing!',

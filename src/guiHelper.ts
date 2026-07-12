@@ -5,20 +5,29 @@
  *    "colorette": "^1.2.1"
  * }
  **/
-const puppeteer = require('puppeteer');
-const { blue, cyan, red, yellow } = require('colorette');
-const { existsSync, mkdirSync } = require('node:fs');
+import puppeteer, { type Browser, type Page } from 'puppeteer';
+import { blue, cyan, red, yellow } from 'colorette';
+import { existsSync, mkdirSync } from 'node:fs';
 
-let gBrowser;
-let gPage;
+type Colorize = (text: string | number) => string;
 
-/* This function starts the browser and opens the desired adapter
- * @param {string} adapterName - could be just an adapter name or adapter name with path, like 'device-manager/tab_m.html'
- * @param {string} rootDir
- * @param {boolean} headless
- * @param {pathUrl} string
+let gBrowser: Browser | undefined;
+let gPage: Page | undefined;
+
+/**
+ * This function starts the browser and opens the desired adapter
+ *
+ * @param adapterName could be just an adapter name or adapter name with path, like 'device-manager/tab_m.html'
+ * @param rootDir the root directory of the project
+ * @param headless whether the browser should be started in headless mode
+ * @param pathUrl optional URL path to open instead of the default adapter page
  */
-async function startBrowser(adapterName, rootDir, headless, pathUrl) {
+export async function startBrowser(
+    adapterName: string,
+    rootDir: string,
+    headless?: boolean,
+    pathUrl?: string,
+): Promise<{ browser: Browser; page: Page }> {
     if (!rootDir.endsWith('/')) {
         rootDir += '/';
     }
@@ -43,9 +52,9 @@ async function startBrowser(adapterName, rootDir, headless, pathUrl) {
     // LOGGING
     gPage
         .on('console', message => {
-            const type = message.type().substr(0, 3).toUpperCase();
-            const colors = {
-                LOG: text => text,
+            const type = message.type().substring(0, 3).toUpperCase();
+            const colors: Record<string, Colorize> = {
+                LOG: (text: string | number) => `${text}`,
                 ERR: red,
                 WAR: yellow,
                 INF: cyan,
@@ -56,9 +65,7 @@ async function startBrowser(adapterName, rootDir, headless, pathUrl) {
         })
         .on('pageerror', ({ message }) => console.log(red(`[BROWSER] ${message}`)));
 
-    pathUrl =
-        pathUrl ||
-        `/adapter/${adapterName.includes('/') ? (!adapterName.includes('?') ? `${adapterName}?` : adapterName) : `${adapterName}/index_m.html?`}&newReact=true&0&react=dark`;
+    pathUrl ||= `/adapter/${adapterName.includes('/') ? (!adapterName.includes('?') ? `${adapterName}?` : adapterName) : `${adapterName}/index_m.html?`}&newReact=true&0&react=dark`;
     if (!pathUrl.startsWith('/')) {
         pathUrl = `/${pathUrl}`;
     }
@@ -72,21 +79,15 @@ async function startBrowser(adapterName, rootDir, headless, pathUrl) {
     return { browser, page: pages[0] };
 }
 
-async function stopBrowser(browser) {
-    browser = browser || gBrowser;
-    await browser.close();
+export async function stopBrowser(browser?: Browser): Promise<void> {
+    browser ||= gBrowser;
+    await browser?.close();
 }
 
-async function screenshot(rootDir, page, fileName) {
+export async function screenshot(rootDir: string, page?: Page, fileName?: string): Promise<void> {
     if (!rootDir.endsWith('/')) {
         rootDir += '/';
     }
-    page = page || gPage;
-    await page.screenshot({ path: `${rootDir}tmp/screenshots/${fileName}.png` });
+    page ||= gPage;
+    await page?.screenshot({ path: `${rootDir}tmp/screenshots/${fileName}.png` });
 }
-
-module.exports = {
-    startBrowser,
-    stopBrowser,
-    screenshot,
-};

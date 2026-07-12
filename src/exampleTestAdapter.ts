@@ -1,47 +1,56 @@
-/* jshint -W097 */
-/* jshint strict: false */
-/* jslint node: true */
-/* jshint expr: true*/
-'use strict';
-const expect = require('chai').expect;
-const setup = require('@iobroker/legacy-tests').setup;
+/*
+ * This is an example test file that shows how to use `@iobroker/legacy-testing`
+ * inside an adapter. Copy it into your adapter's `test` folder and adapt it.
+ * It is intentionally excluded from the build/lint of this repository because it
+ * references the published package by name (which is only resolvable in a consumer).
+ */
+import * as setup from '@iobroker/legacy-testing';
+import { expect } from 'chai';
 
-let objects = null;
-let states = null;
-let onStateChanged = null;
+let objects: setup.ObjectsClient = null;
+let states: setup.StatesClient = null;
+const onStateChanged: ((id: string, state: ioBroker.State | null | undefined) => void) | null = null;
 
-let adapterShortName = setup.adapterName.substring(setup.adapterName.indexOf('.') + 1);
+const adapterShortName = setup.adapterName.substring(setup.adapterName.indexOf('.') + 1);
 
-function checkConnectionOfAdapter(cb, counter) {
-    counter = counter || 0;
+function checkConnectionOfAdapter(cb?: (error?: string) => void, counter?: number): void {
+    counter ||= 0;
     console.log(`Try check #${counter}`);
     if (counter > 30) {
-        cb && cb('Cannot check connection');
+        cb?.('Cannot check connection');
         return;
     }
 
-    states.getState(`system.adapter.${adapterShortName}.0.alive`, (err, state) => {
-        err && console.error(err);
-        if (state && state.val) {
-            cb && cb();
-        } else {
-            setTimeout(() => checkConnectionOfAdapter(cb, counter + 1), 1000);
-        }
-    });
+    states.getState(
+        `system.adapter.${adapterShortName}.0.alive`,
+        (err: Error | null, state: ioBroker.State | null | undefined) => {
+            err && console.error(err);
+            if (state?.val) {
+                cb?.();
+            } else {
+                setTimeout(() => checkConnectionOfAdapter(cb, counter + 1), 1000);
+            }
+        },
+    );
 }
 
-function checkValueOfState(id, value, cb, counter) {
-    counter = counter || 0;
+function checkValueOfState(
+    id: string,
+    value: ioBroker.StateValue,
+    cb?: (error?: string) => void,
+    counter?: number,
+): void {
+    counter ||= 0;
     if (counter > 20) {
-        return cb && cb(`Cannot check value Of State ${id}`);
+        return cb?.(`Cannot check value Of State ${id}`);
     }
 
-    states.getState(id, (err, state) => {
+    states.getState(id, (err: Error | null, state: ioBroker.State | null | undefined) => {
         err && console.error(err);
         if (value === null && !state) {
-            cb && cb();
+            cb?.();
         } else if (state && (value === undefined || state.val === value)) {
-            cb && cb();
+            cb?.();
         } else {
             setTimeout(() => checkValueOfState(id, value, cb, counter + 1), 500);
         }
@@ -53,7 +62,7 @@ describe(`Test ${adapterShortName} adapter`, function () {
         this.timeout(600000);
 
         setup.setupController(async () => {
-            let config = await setup.getAdapterConfig();
+            const config = await setup.getAdapterConfig();
             // enable adapter
             config.common.enabled = true;
             config.common.loglevel = 'debug';
@@ -69,8 +78,8 @@ describe(`Test ${adapterShortName} adapter`, function () {
 
             setup.startController(
                 true,
-                (id, obj) => {},
-                (id, state) => onStateChanged && onStateChanged(id, state),
+                () => {},
+                (id, state) => onStateChanged?.(id, state),
                 (_objects, _states) => {
                     objects = _objects;
                     states = _states;

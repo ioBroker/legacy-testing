@@ -17,7 +17,10 @@ Set `process.env.JS_CONTROLLER_VERSION` to version e.g. `5.0.5-alpha.0-20230617-
 
 ## Changelog
 
-<!-- ### **WORK IN PROGRESS** -->
+### **WORK IN PROGRESS**
+-   (@GermanBluefox) The module was rewritten in TypeScript. The sources live now in `src/` and are compiled to `build/`. The public API and import paths stayed the same.
+-   (@GermanBluefox) If `JS_CONTROLLER_VERSION` is not set, js-controller `7.2.2` is installed on Node.js <= 20 and the `dev` build on newer Node.js versions.
+
 ### 2.0.2 (2025-01-21)
 -   (@GermanBluefox) Packages were updated
 
