@@ -26,7 +26,7 @@ export interface StartIoBrokerAdaptersOptions {
     adapters?: string[];
 }
 
-let rootDir = `${__dirname}/../../../`;
+let rootDir = `${__dirname}/../../../../`;
 let objects: ObjectsClient | null = null;
 let states: StatesClient | null = null;
 let onStateChanged: OnStateChanged | null = null;

@@ -40,14 +40,14 @@ type ControllerCallback = (objects: ObjectsClient, states: StatesClient) => void
 /** Subset of the `JsonlDB` class from `@alcalzone/jsonl-db` that is used here */
 type JsonlDBConstructor = new (file: string) => JsonlDB;
 
-let rootDir = normalize(`${__dirname}/../../../`);
+let rootDir = normalize(`${__dirname}/../../../../`);
 const debug = typeof (globalThis as { v8debug?: unknown }).v8debug === 'object';
 
 let JSONLDB: JsonlDBConstructor | undefined;
 
 let adapterParts = normalize(rootDir).replace(/\\/g, '/').split('/');
 if (adapterParts[adapterParts.length - 2] === 'vis-2-widgets-testing') {
-    rootDir = normalize(`${__dirname}/../../../../../../`);
+    rootDir = normalize(`${__dirname}/../../../../../../../`);
     adapterParts = normalize(rootDir).replace(/\\/g, '/').split('/');
 }
 const adapterName = adapterParts[adapterParts.length - 2];

@@ -2,8 +2,8 @@ import { expect } from 'chai';
 import { readFileSync, existsSync } from 'node:fs';
 
 // node_modules/@iobroker/legacy-testing/tests/testPackageFiles.js
-const adapterDir = process.env.IOBROKER_ROOT_DIR || `${__dirname}/../../../../`;
-const alternativeAdapterDir = `${__dirname}/../../../../`;
+const adapterDir = process.env.IOBROKER_ROOT_DIR || `${__dirname}/../../../../../`;
+const alternativeAdapterDir = `${__dirname}/../../../../../`;
 
 describe('Test package.json and io-package.json', () => {
     it('Test package files', done => {
