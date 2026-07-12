@@ -1,78 +1,78 @@
 {
-    "version": "2.0.2",
-    "name": "@iobroker/legacy-testing",
-    "main": "build/setup.js",
-    "types": "build/setup.d.ts",
-    "exports": {
-        ".": {
-            "types": "./build/setup.d.ts",
-            "default": "./build/setup.js"
-        },
-        "./setup": {
-            "types": "./build/setup.d.ts",
-            "default": "./build/setup.js"
-        },
-        "./engineHelper": {
-            "types": "./build/engineHelper.d.ts",
-            "default": "./build/engineHelper.js"
-        },
-        "./guiHelper": {
-            "types": "./build/guiHelper.d.ts",
-            "default": "./build/guiHelper.js"
-        },
-        "./tests/testPackageFiles": {
-            "types": "./build/tests/testPackageFiles.d.ts",
-            "default": "./build/tests/testPackageFiles.js"
-        },
-        "./package.json": "./package.json"
+  "version": "2.1.0",
+  "name": "@iobroker/legacy-testing",
+  "main": "build/setup.js",
+  "types": "build/setup.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/setup.d.ts",
+      "default": "./build/setup.js"
     },
-    "files": [
-        "build/"
-    ],
-    "description": "Module to test ioBroker adapters with legacy tests. For new tests please use @iobroker/testing",
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/ioBroker/legacy-testing.git"
+    "./setup": {
+      "types": "./build/setup.d.ts",
+      "default": "./build/setup.js"
     },
-    "publishConfig": {
-        "access": "public"
+    "./engineHelper": {
+      "types": "./build/engineHelper.d.ts",
+      "default": "./build/engineHelper.js"
     },
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/ioBroker/legacy-testing/issues"
+    "./guiHelper": {
+      "types": "./build/guiHelper.d.ts",
+      "default": "./build/guiHelper.js"
     },
-    "homepage": "https://github.com/ioBroker/legacy-testing#readme",
-    "author": {
-        "name": "bluefox",
-        "email": "dogafox@gmail.com"
+    "./tests/testPackageFiles": {
+      "types": "./build/tests/testPackageFiles.d.ts",
+      "default": "./build/tests/testPackageFiles.js"
     },
-    "dependencies": {
-        "mocha": "^11.7.6",
-        "chai": "^4.5.0"
-    },
-    "devDependencies": {
-        "@alcalzone/jsonl-db": "^4.0.2",
-        "@alcalzone/release-script": "^5.2.1",
-        "@alcalzone/release-script-plugin-license": "^5.2.0",
-        "@iobroker/db-objects-redis": "^7.2.2",
-        "@iobroker/db-states-redis": "^7.2.2",
-        "@iobroker/eslint-config": "^2.3.4",
-        "@iobroker/types": "^7.2.2",
-        "@tsconfig/node18": "^18.2.6",
-        "@types/chai": "^4.3.20",
-        "@types/mocha": "^10.0.10",
-        "@types/node": "^18.19.130",
-        "typescript": "^6.0.3"
-    },
-    "scripts": {
-        "build": "tsc -p tsconfig.build.json",
-        "check": "tsc -p tsconfig.json",
-        "lint": "eslint -c eslint.config.mjs .",
-        "prepublishOnly": "npm run build",
-        "release": "release-script",
-        "release-patch": "release-script patch --yes",
-        "release-minor": "release-script minor --yes",
-        "release-major": "release-script major --yes",
-        "update-packages": "ncu --upgrade"
-    }
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "build/"
+  ],
+  "description": "Module to test ioBroker adapters with legacy tests. For new tests please use @iobroker/testing",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ioBroker/legacy-testing.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ioBroker/legacy-testing/issues"
+  },
+  "homepage": "https://github.com/ioBroker/legacy-testing#readme",
+  "author": {
+    "name": "bluefox",
+    "email": "dogafox@gmail.com"
+  },
+  "dependencies": {
+    "mocha": "^11.7.6",
+    "chai": "^4.5.0"
+  },
+  "devDependencies": {
+    "@alcalzone/jsonl-db": "^4.0.2",
+    "@alcalzone/release-script": "^5.2.1",
+    "@alcalzone/release-script-plugin-license": "^5.2.0",
+    "@iobroker/db-objects-redis": "^7.2.2",
+    "@iobroker/db-states-redis": "^7.2.2",
+    "@iobroker/eslint-config": "^2.3.4",
+    "@iobroker/types": "^7.2.2",
+    "@tsconfig/node18": "^18.2.6",
+    "@types/chai": "^4.3.20",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^18.19.130",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "check": "tsc -p tsconfig.json",
+    "lint": "eslint -c eslint.config.mjs .",
+    "prepublishOnly": "npm run build",
+    "release": "release-script",
+    "release-patch": "release-script patch --yes",
+    "release-minor": "release-script minor --yes",
+    "release-major": "release-script major --yes",
+    "update-packages": "ncu --upgrade"
+  }
 }
