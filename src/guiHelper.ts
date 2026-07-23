@@ -8,11 +8,51 @@
 import puppeteer, { type Browser, type Page } from 'puppeteer';
 import { blue, cyan, red, yellow } from 'colorette';
 import { existsSync, mkdirSync } from 'node:fs';
+import { get } from 'node:http';
 
 type Colorize = (text: string | number) => string;
 
 let gBrowser: Browser | undefined;
 let gPage: Page | undefined;
+
+/**
+ * The admin adapter reports "alive" before its web server accepts connections, so on slow
+ * machines the first page load can fail with ERR_CONNECTION_REFUSED. Poll the server until
+ * it answers (any HTTP status counts as ready). After the timeout the navigation is
+ * attempted anyway, so the real error is still reported by the page load itself.
+ */
+function waitForServer(baseUrl: string, timeoutMs: number): Promise<void> {
+    return new Promise(resolve => {
+        const started = Date.now();
+        let waitingReported = false;
+
+        const tryOnce = (): void => {
+            const request = get(baseUrl, response => {
+                response.resume();
+                resolve();
+            });
+            request.setTimeout(2000, () => request.destroy(new Error('timeout')));
+            request.on('error', () => {
+                if (Date.now() - started >= timeoutMs) {
+                    console.log(
+                        yellow(
+                            `Web server at ${baseUrl} did not accept connections within ${Math.round(timeoutMs / 1000)} seconds`,
+                        ),
+                    );
+                    resolve();
+                } else {
+                    if (!waitingReported) {
+                        waitingReported = true;
+                        console.log(`Waiting for the web server at ${baseUrl} to accept connections...`);
+                    }
+                    setTimeout(tryOnce, 500);
+                }
+            });
+        };
+
+        tryOnce();
+    });
+}
 
 /**
  * This function starts the browser and opens the desired adapter
@@ -70,7 +110,9 @@ export async function startBrowser(
         pathUrl = `/${pathUrl}`;
     }
 
-    await gPage.goto(`http://127.0.0.1:8081${pathUrl}`, { waitUntil: 'domcontentloaded' });
+    const baseUrl = 'http://127.0.0.1:8081';
+    await waitForServer(baseUrl, 30_000);
+    await gPage.goto(`${baseUrl}${pathUrl}`, { waitUntil: 'domcontentloaded' });
 
     // Create directory
     !existsSync(`${rootDir}tmp/screenshots`) && mkdirSync(`${rootDir}tmp/screenshots`);
