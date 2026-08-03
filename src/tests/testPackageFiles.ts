@@ -1,9 +1,14 @@
-import { expect } from 'chai';
+import assert from 'node:assert';
 import { readFileSync, existsSync } from 'node:fs';
 
 // node_modules/@iobroker/legacy-testing/tests/testPackageFiles.js
 const adapterDir = process.env.IOBROKER_ROOT_DIR || `${__dirname}/../../../../../`;
 const alternativeAdapterDir = `${__dirname}/../../../../../`;
+
+/** Assert that the value is neither `null` nor `undefined` */
+function assertExists(value: unknown, message: string): void {
+    assert.ok(value !== null && value !== undefined, message);
+}
 
 describe('Test package.json and io-package.json', () => {
     it('Test package files', done => {
@@ -15,16 +20,17 @@ describe('Test package.json and io-package.json', () => {
         const fileContentNPMPackage = readFileSync(`${adapterDir}/package.json`, 'utf8');
         const npmPackage = JSON.parse(fileContentNPMPackage);
 
-        expect(ioPackage).to.be.an('object');
-        expect(npmPackage).to.be.an('object');
+        assert.ok(ioPackage && typeof ioPackage === 'object', 'ERROR: io-package.json must contain an object');
+        assert.ok(npmPackage && typeof npmPackage === 'object', 'ERROR: package.json must contain an object');
 
-        expect(ioPackage.common.version, 'ERROR: Version number in io-package.json needs to exist').to.exist;
-        expect(npmPackage.version, 'ERROR: Version number in package.json needs to exist').to.exist;
+        assertExists(ioPackage.common.version, 'ERROR: Version number in io-package.json needs to exist');
+        assertExists(npmPackage.version, 'ERROR: Version number in package.json needs to exist');
 
-        expect(
+        assert.strictEqual(
             ioPackage.common.version,
+            npmPackage.version,
             'ERROR: Version numbers in package.json and io-package.json needs to match',
-        ).to.be.equal(npmPackage.version);
+        );
 
         if (!ioPackage.common.news || !ioPackage.common.news[ioPackage.common.version]) {
             console.log(
@@ -33,41 +39,44 @@ describe('Test package.json and io-package.json', () => {
             console.log();
         }
 
-        expect(npmPackage.author, 'ERROR: Author in package.json needs to exist').to.exist;
-        expect(ioPackage.common.authors, 'ERROR: Authors in io-package.json needs to exist').to.exist;
+        assertExists(npmPackage.author, 'ERROR: Author in package.json needs to exist');
+        assertExists(ioPackage.common.authors, 'ERROR: Authors in io-package.json needs to exist');
 
-        expect(
+        assertExists(
             ioPackage.common.license || ioPackage.common.licenseInformation?.license,
             'ERROR: License missing in io-package in common.license or in common.licenseInformation.license',
-        ).to.exist;
+        );
 
         if (ioPackage.common.name.includes('template')) {
             if (Array.isArray(ioPackage.common.authors)) {
-                expect(
+                assert.notStrictEqual(
                     ioPackage.common.authors.length,
+                    0,
                     'ERROR: Author in io-package.json needs to be set',
-                ).to.not.be.equal(0);
+                );
                 if (ioPackage.common.authors.length === 1) {
-                    expect(
+                    assert.notStrictEqual(
                         ioPackage.common.authors[0],
+                        'my Name <my@email.com>',
                         'ERROR: Author in io-package.json needs to be a real name',
-                    ).to.not.be.equal('my Name <my@email.com>');
+                    );
                 }
             } else {
-                expect(
+                assert.notStrictEqual(
                     ioPackage.common.authors,
+                    'my Name <my@email.com>',
                     'ERROR: Author in io-package.json needs to be a real name',
-                ).to.not.be.equal('my Name <my@email.com>');
+                );
             }
         } else {
             console.log('WARNING: Testing for set authors field in io-package skipped because template adapter');
             console.log();
         }
 
-        expect(
+        assert.ok(
             existsSync(`${adapterDir}/README.md`) || existsSync(`${alternativeAdapterDir}/README.md`),
             'ERROR: README.md needs to exist! Please create one with description, detail information and changelog. English is mandatory.',
-        ).to.be.true;
+        );
 
         if (!ioPackage.common.titleLang || typeof ioPackage.common.titleLang !== 'object') {
             console.log('WARNING: titleLang is not existing in io-package.json. Please add');
@@ -88,30 +97,30 @@ describe('Test package.json and io-package.json', () => {
 
         if (!ioPackage.common.controller && !ioPackage.common.onlyWWW && !ioPackage.common.noConfig) {
             if (ioPackage.common.materialize || ioPackage.common.adminUI?.conifg === 'materialize') {
-                expect(
+                assert.ok(
                     existsSync(`${adapterDir}/admin/index_m.html`),
                     'Admin3 support is enabled in io-package.json, but index_m.html is missing!',
-                ).to.be.true;
+                );
             }
             if (ioPackage.common.jsonConfig || ioPackage.common.adminUI?.conifg === 'json') {
-                expect(
+                assert.ok(
                     existsSync(`${adapterDir}/admin/jsonConfig.json`) ||
                         existsSync(`${adapterDir}/admin/jsonConfig.json5`),
                     'Admin3 support is enabled in io-package.json, but jsonConfig.json(5) is missing!',
-                ).to.be.true;
+                );
             }
             if (ioPackage.common.adminUI?.custom === 'json') {
-                expect(
+                assert.ok(
                     existsSync(`${adapterDir}/admin/jsonCustom.json`) ||
                         existsSync(`${adapterDir}/admin/jsonCustom.json5`),
                     'Custom config support is enabled in io-package.json, but jsonCustom.json(5) is missing!',
-                ).to.be.true;
+                );
             }
             if (ioPackage.common.adminUI?.tab === 'html') {
-                expect(
+                assert.ok(
                     existsSync(`${adapterDir}/admin/tab.html`) || existsSync(`${adapterDir}/admin/tab_m.html`),
                     'HTML-Tab support is enabled in io-package.json, but tab(_m).html is missing!',
-                ).to.be.true;
+                );
             }
         }
 
@@ -125,10 +134,10 @@ describe('Test package.json and io-package.json', () => {
             console.log();
         }
 
-        expect(
+        assert.ok(
             licenseFileExists || fileContentReadme.includes('## License'),
             'A LICENSE must exist as LICENSE file or as part of the README.md',
-        ).to.be.true;
+        );
 
         if (!licenseFileExists) {
             console.log('Warning: The License should also exist as LICENSE file');
