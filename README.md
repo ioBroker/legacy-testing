@@ -15,7 +15,18 @@ Legacy test modules for ioBroker
 
 Set `process.env.JS_CONTROLLER_VERSION` to version e.g. `5.0.5-alpha.0-20230617-464b0fd6`
 
+## Usage of the specific admin version
+
+Set `process.env.ADMIN_VERSION` to version e.g. `7.6.0`. It is used for the GUI tests, where the admin is started.
+If it is not set, the js-controller installs the version from the ioBroker repository (normally the latest one).
+The variable is ignored if the admin itself is the adapter under test.
+
+<!-- ### **WORK IN PROGRESS** -->
 ## Changelog
+### **WORK IN PROGRESS**
+-   (@GermanBluefox) Added `ADMIN_VERSION` environment variable to install a specific admin version
+-   (@GermanBluefox) Removed `chai`. Use `node:assert` instead
+
 ### 2.1.2 (2026-07-12)
 -   (@GermanBluefox) The module was rewritten in TypeScript. The sources live now in `src/` and are compiled to `build/`. The public API and import paths stayed the same.
 -   (@GermanBluefox) If `JS_CONTROLLER_VERSION` is not set, js-controller `7.2.2` is installed on Node.js <= 20 and the `dev` build on newer Node.js versions.

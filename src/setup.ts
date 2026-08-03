@@ -43,6 +43,9 @@ type JsonlDBConstructor = new (file: string) => JsonlDB;
 let rootDir = normalize(`${__dirname}/../../../../`);
 const debug = typeof (globalThis as { v8debug?: unknown }).v8debug === 'object';
 
+/** npm package name of the admin adapter */
+const ADMIN_PACKAGE = 'iobroker.admin';
+
 let JSONLDB: JsonlDBConstructor | undefined;
 
 let adapterParts = normalize(rootDir).replace(/\\/g, '/').split('/');
@@ -322,6 +325,19 @@ async function installAdapter(customAdapterName?: string | (() => void) | null, 
     }
 
     customAdapterName ||= pkg.name;
+
+    // Install the requested admin version, but never overwrite the adapter under test,
+    // e.g. if the admin itself is tested
+    const adminVersion = getAdminVersion();
+    if (
+        adminVersion &&
+        pkg.name !== ADMIN_PACKAGE &&
+        (customAdapterName === 'admin' || customAdapterName === ADMIN_PACKAGE)
+    ) {
+        console.log(`[admin] Use version "${adminVersion}" from ADMIN_VERSION`);
+        customAdapterName = `${ADMIN_PACKAGE}@${adminVersion}`;
+    }
+
     console.log(`[${customAdapterName}] Install adapter...`);
 
     if (customAdapterName.includes('@')) {
@@ -388,6 +404,15 @@ function getJsControllerVersion(): string {
     }
     const nodeMajor = parseInt(process.versions.node.split('.')[0], 10);
     return nodeMajor <= 20 ? '7.2.2' : 'dev';
+}
+
+/**
+ * Determine the admin version to install: the explicitly requested `ADMIN_VERSION`
+ * or - if none is given - `undefined`, so the js-controller installs the version
+ * from the configured repository (normally the latest one).
+ */
+function getAdminVersion(): string | undefined {
+    return process.env.ADMIN_VERSION || undefined;
 }
 
 async function installJsController(
@@ -583,13 +608,30 @@ function copyAdapterToController(): void {
 }
 
 function installCustomAdapter(customAdapterName: string): void {
-    if (!existsSync(`${rootDir}tmp/node_modules/${customAdapterName}`)) {
+    // split `iobroker.admin@7.6.0` into name and version
+    const atPos = customAdapterName.lastIndexOf('@');
+    const name = atPos > 0 ? customAdapterName.substring(0, atPos) : customAdapterName;
+    const version = atPos > 0 ? customAdapterName.substring(atPos + 1) : '';
+    const packageJsonPath = `${rootDir}tmp/node_modules/${name}/package.json`;
+
+    if (existsSync(packageJsonPath)) {
+        if (!version) {
+            return;
+        }
+        // re-install only if another version is installed
+        const pack: AdapterPackageJson = require(packageJsonPath);
+        if (pack.version === version) {
+            return;
+        }
+        console.log(`Install ${customAdapterName} (installed: ${pack.version})`);
+    } else {
         console.log(`Install ${customAdapterName}`);
-        execSync(`npm install ${customAdapterName} --prefix ./ --omit=dev`, {
-            cwd: `${rootDir}tmp/`,
-            stdio: [0, 1, 2],
-        });
     }
+
+    execSync(`npm install ${customAdapterName} --prefix ./ --omit=dev`, {
+        cwd: `${rootDir}tmp/`,
+        stdio: [0, 1, 2],
+    });
 }
 
 function clearControllerLog(): void {
