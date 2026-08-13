@@ -23,6 +23,9 @@ The variable is ignored if the admin itself is the adapter under test.
 
 <!-- ### **WORK IN PROGRESS** -->
 ## Changelog
+### **WORK IN PROGRESS**
+-   (@krobipd) `guiHelper.startBrowser`: wait until the admin web server accepts connections before opening the page — on slow CI runners the admin instance reports `alive` before its web server listens, and the single page load failed with `ERR_CONNECTION_REFUSED`.
+
 ### 3.0.0 (2026-08-03)
 -   (@GermanBluefox) Added `ADMIN_VERSION` environment variable to install a specific admin version
 -   (@GermanBluefox) Removed `chai`. Use `node:assert` instead
