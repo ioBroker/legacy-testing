@@ -1,5 +1,5 @@
 {
-  "version": "2.1.2",
+  "version": "3.0.0",
   "name": "@iobroker/legacy-testing",
   "main": "build/setup.js",
   "types": "build/setup.d.ts",
@@ -47,19 +47,17 @@
     "email": "dogafox@gmail.com"
   },
   "dependencies": {
-    "mocha": "^11.7.6",
-    "chai": "^4.5.0"
+    "mocha": "^11.8.0"
   },
   "devDependencies": {
     "@alcalzone/jsonl-db": "^4.0.2",
     "@alcalzone/release-script": "^5.2.1",
-    "@alcalzone/release-script-plugin-license": "^5.2.0",
+    "@alcalzone/release-script-plugin-license": "^5.2.2",
     "@iobroker/db-objects-redis": "^7.2.2",
     "@iobroker/db-states-redis": "^7.2.2",
     "@iobroker/eslint-config": "^2.3.4",
     "@iobroker/types": "^7.2.2",
     "@tsconfig/node18": "^18.2.6",
-    "@types/chai": "^4.3.20",
     "@types/mocha": "^10.0.10",
     "@types/node": "^18.19.130",
     "typescript": "^6.0.3"

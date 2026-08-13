@@ -5,10 +5,10 @@
  * references the published package by name (which is only resolvable in a consumer).
  */
 import * as setup from '@iobroker/legacy-testing';
-import { expect } from 'chai';
+import assert from 'node:assert';
 
-let objects: setup.ObjectsClient = null;
-let states: setup.StatesClient = null;
+let objects: setup.ObjectsClient | null = null;
+let states: setup.StatesClient | null = null;
 const onStateChanged: ((id: string, state: ioBroker.State | null | undefined) => void) | null = null;
 
 const adapterShortName = setup.adapterName.substring(setup.adapterName.indexOf('.') + 1);
@@ -21,9 +21,9 @@ function checkConnectionOfAdapter(cb?: (error?: string) => void, counter?: numbe
         return;
     }
 
-    states.getState(
+    states?.getState(
         `system.adapter.${adapterShortName}.0.alive`,
-        (err: Error | null, state: ioBroker.State | null | undefined) => {
+        (err: Error | null | undefined, state: ioBroker.State | null | undefined) => {
             err && console.error(err);
             if (state?.val) {
                 cb?.();
@@ -45,7 +45,7 @@ function checkValueOfState(
         return cb?.(`Cannot check value Of State ${id}`);
     }
 
-    states.getState(id, (err: Error | null, state: ioBroker.State | null | undefined) => {
+    states?.getState(id, (err: Error | null | undefined, state: ioBroker.State | null | undefined) => {
         err && console.error(err);
         if (value === null && !state) {
             cb?.();
@@ -63,6 +63,9 @@ describe(`Test ${adapterShortName} adapter`, function () {
 
         setup.setupController(async () => {
             const config = await setup.getAdapterConfig();
+            if (!config) {
+                throw new Error('Unable to initialize adapter as config is missing');
+            }
             // enable adapter
             config.common.enabled = true;
             config.common.loglevel = 'debug';
@@ -79,6 +82,7 @@ describe(`Test ${adapterShortName} adapter`, function () {
             setup.startController(
                 true,
                 () => {},
+                // @ts-expect-error onStateChanged is only example
                 (id, state) => onStateChanged?.(id, state),
                 (_objects, _states) => {
                     objects = _objects;
@@ -92,7 +96,7 @@ describe(`Test ${adapterShortName} adapter`, function () {
     it(`Test ${adapterShortName} adapter: Check if adapter started`, done => {
         checkConnectionOfAdapter(res => {
             res && console.log(res);
-            expect(res).not.to.be.equal('Cannot check connection');
+            assert.notStrictEqual(res, 'Cannot check connection');
             done();
         });
     }).timeout(60000);
