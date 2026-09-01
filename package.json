@@ -57,7 +57,7 @@
     "@iobroker/db-states-redis": "^7.2.2",
     "@iobroker/eslint-config": "^2.3.4",
     "@iobroker/types": "^7.2.2",
-    "@tsconfig/node18": "^18.2.6",
+    "@tsconfig/node18": "^18.2.7",
     "@types/mocha": "^10.0.10",
     "@types/node": "^18.19.130",
     "typescript": "^6.0.3"
