@@ -47,7 +47,7 @@
     "email": "dogafox@gmail.com"
   },
   "dependencies": {
-    "mocha": "^11.8.0"
+    "mocha": "^12.0.2"
   },
   "devDependencies": {
     "@alcalzone/jsonl-db": "^4.0.2",
