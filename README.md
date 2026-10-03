@@ -23,7 +23,7 @@ The variable is ignored if the admin itself is the adapter under test.
 
 <!-- ### **WORK IN PROGRESS** -->
 ## Changelog
-### **WORK IN PROGRESS**
+### 4.0.0 (2026-10-03)
 -   (@GermanBluefox) Updated `mocha` to 12.x. The 11.x line pulls in a `serialize-javascript` with a known advisory, and an adapter using this module could not resolve that on its own. Note that `mocha` 12 needs Node.js `^20.19.0 || >=22.12.0`
 -   (@GermanBluefox) Breaking change: minimal Node.js version is now 22.19.0.
 
