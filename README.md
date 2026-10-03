@@ -23,6 +23,10 @@ The variable is ignored if the admin itself is the adapter under test.
 
 <!-- ### **WORK IN PROGRESS** -->
 ## Changelog
+### **WORK IN PROGRESS**
+-   (@GermanBluefox) Updated `mocha` to 12.x. The 11.x line pulls in a `serialize-javascript` with a known advisory, and an adapter using this module could not resolve that on its own. Note that `mocha` 12 needs Node.js `^20.19.0 || >=22.12.0`
+-   (@GermanBluefox) Breaking change: minimal Node.js version is now 22.19.0.
+
 ### 3.0.1 (2026-08-13)
 -   (@krobipd) `guiHelper.startBrowser`: wait until the admin web server accepts connections before opening the page — on slow CI runners the admin instance reports `alive` before its web server listens, and the single page load failed with `ERR_CONNECTION_REFUSED`.
 
