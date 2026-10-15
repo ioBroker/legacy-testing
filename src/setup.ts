@@ -890,6 +890,8 @@ function startController(
 
 function startController(_isStartAdapter: boolean, _callback?: ControllerCallback): void;
 
+function startController(_callback?: ControllerCallback): void;
+
 function startController(
     _isStartAdapter?: unknown,
     _onObjectChange?: unknown,
@@ -899,29 +901,22 @@ function startController(
     let onObjectChange: ChangeHandlerObject | undefined;
     let onStateChange: ChangeHandlerState | undefined;
     let callback: ControllerCallback | undefined;
-    let isStartAdapter = typeof _isStartAdapter === 'boolean' ? _isStartAdapter : true;
+    let isStartAdapter = true;
+    let args: unknown[] = [_isStartAdapter, _onObjectChange, _onStateChange, _callback];
 
-    if (typeof _isStartAdapter === 'function') {
-        callback = _onStateChange as ControllerCallback;
-        _onStateChange = undefined;
-        onStateChange = _onObjectChange as ChangeHandlerState;
-        _onObjectChange = undefined;
-        onObjectChange = _isStartAdapter as ChangeHandlerObject;
-        isStartAdapter = true;
+    // The first argument is optional: without it, everything is shifted by one
+    if (typeof _isStartAdapter !== 'function') {
+        isStartAdapter = _isStartAdapter !== false;
+        args = args.slice(1);
     }
-    if (_onStateChange === undefined) {
-        callback = _onObjectChange as ControllerCallback;
-        isStartAdapter = _isStartAdapter as boolean;
-        _onObjectChange = undefined;
-    }
-    if (typeof _onStateChange === 'function') {
-        onStateChange = _onStateChange as ChangeHandlerState;
-    }
-    if (typeof _onObjectChange === 'function') {
-        onObjectChange = _onObjectChange as ChangeHandlerObject;
-    }
-    if (typeof _callback === 'function') {
-        callback = _callback as ControllerCallback;
+    if (args[1] === undefined) {
+        // startController([isStartAdapter,] callback)
+        callback = args[0] as ControllerCallback | undefined;
+    } else {
+        // startController([isStartAdapter,] onObjectChange, onStateChange, callback)
+        onObjectChange = args[0] as ChangeHandlerObject | undefined;
+        onStateChange = args[1] as ChangeHandlerState | undefined;
+        callback = args[2] as ControllerCallback | undefined;
     }
 
     if (pids.controller) {
