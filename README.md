@@ -23,7 +23,7 @@ The variable is ignored if the admin itself is the adapter under test.
 
 <!-- ### **WORK IN PROGRESS** -->
 ## Changelog
-### **WORK IN PROGRESS**
+### 4.0.1 (2026-10-15)
 -   (@GermanBluefox) Fixed `startController(callback)` and `startController(onObjectChange, onStateChange, callback)`: the callback was never called, so the test hung until its timeout (broken since 2.1.0)
 
 ### 4.0.0 (2026-10-03)
