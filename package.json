@@ -57,7 +57,7 @@
     "@alcalzone/release-script": "^5.2.1",
     "@alcalzone/release-script-plugin-license": "^5.2.2",
     "@iobroker/db-objects-redis": "^7.2.4",
-    "@iobroker/db-states-redis": "^7.2.4",
+    "@iobroker/db-states-redis": "^7.2.5",
     "@iobroker/eslint-config": "^2.3.4",
     "@iobroker/types": "^7.2.4",
     "@tsconfig/node22": "^22.0.6",
